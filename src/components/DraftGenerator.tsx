@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles } from "lucide-react";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -377,6 +377,142 @@ Follow-up: [date].`,
   };
 };
 
+const generateRiskCheck = (scenario: string, tone: string, context: string): string => {
+  const riskChecks: Record<string, string[]> = {
+    "performance-concern": [
+      "Consider whether performance issues may relate to an undisclosed disability or medical condition requiring accommodation",
+      "Ensure feedback is based on documented, objective criteria—not subjective impressions",
+      "Avoid language that could be perceived as singling out or targeting the employee",
+      "Confirm expectations have been clearly communicated before this conversation",
+      "Document the discussion and agreed next steps promptly",
+    ],
+    "attendance-issue": [
+      "Attendance issues may signal a need for accommodation—do not probe for medical details",
+      "Avoid assumptions about reasons for absences; focus on operational impact only",
+      "Ensure any attendance standards are applied consistently across the team",
+      "Consider whether family status, disability, or other protected grounds may be relevant",
+      "Document the pattern and conversation without speculating on causes",
+    ],
+    "accommodation-request": [
+      "Engage in the interactive process in good faith—delays can create liability",
+      "Focus on functional limitations, not diagnosis or medical details",
+      "Document all options considered and reasons for decisions",
+      "Avoid suggesting the employee is not suited for the role",
+      "Ensure confidentiality of any medical information shared",
+    ],
+    "mental-health-disclosure": [
+      "Do not document diagnosis or specific medical details—record functional needs only",
+      "Avoid making assumptions about capability based on disclosure",
+      "Ensure confidentiality is maintained; limit information to those with a need to know",
+      "Do not pressure the employee to share more than they choose to",
+      "Follow up appropriately without over-checking or signaling concern",
+    ],
+    "return-to-work": [
+      "Do not request medical documentation beyond what is required for accommodation purposes",
+      "Avoid discussing the reason for absence unless the employee raises it",
+      "Ensure any restrictions are applied as documented—do not assume capability",
+      "Consider privacy when reintegrating; avoid drawing attention to the absence",
+      "Document any agreed modifications and follow-up dates",
+    ],
+    "leave-request": [
+      "Ensure leave entitlements are applied consistently and in accordance with policy",
+      "Do not ask for details beyond what is required to process the request",
+      "Consider protected grounds (family status, disability) if leave relates to caregiving or health",
+      "Avoid language that could discourage future legitimate requests",
+      "Document the request and decision clearly",
+    ],
+    "conflict-resolution": [
+      "Gather facts from all parties before drawing conclusions",
+      "Avoid language that pre-judges the situation or assigns blame",
+      "Consider whether the conflict may involve harassment or discrimination allegations",
+      "Document the process and any actions taken consistently for all involved",
+      "Ensure the employee has an opportunity to respond to concerns raised",
+    ],
+    "policy-reminder": [
+      "Ensure the policy is applied consistently across all employees",
+      "Avoid singling out individuals in group communications if the issue is specific",
+      "Consider whether the policy may have disproportionate impact on protected groups",
+      "Document the reminder and any individual follow-up separately",
+    ],
+    "check-in": [
+      "Avoid probing into personal matters unless the employee volunteers information",
+      "Do not make assumptions about the cause of observed changes",
+      "Ensure offers of support are genuine and not used to build a performance file",
+      "Document observations factually without speculation",
+      "Consider whether observed changes may relate to a protected ground",
+    ],
+    "probation-review": [
+      "Ensure evaluation criteria are documented and have been consistently applied",
+      "Avoid feedback that could be seen as based on protected characteristics",
+      "Consider whether any performance issues may require accommodation",
+      "Document the outcome and rationale clearly",
+      "Provide the employee an opportunity to respond to concerns",
+    ],
+    "termination": [
+      "Confirm all documentation is in order and HR has approved the decision",
+      "Avoid discussing reasons beyond what is documented and necessary",
+      "Ensure the termination is not connected to recent protected activity (complaints, leave, accommodation requests)",
+      "Maintain dignity and respect throughout the conversation",
+      "Consider timing—avoid terminations immediately before holidays or during known personal crises if possible",
+      "Document the meeting and provide written confirmation",
+    ],
+    "difficult-timing": [
+      "Consider whether proceeding now could appear retaliatory or insensitive",
+      "Document the business reason for the timing",
+      "Ensure the employee's emotional state is considered in delivery approach",
+      "Avoid proceeding if the employee is in crisis unless absolutely necessary",
+      "Follow up to ensure the message was understood",
+    ],
+    "follow-up": [
+      "Ensure the summary accurately reflects what was discussed—avoid adding new expectations",
+      "Do not include information the employee did not agree to share",
+      "Confirm the employee has an opportunity to correct any misunderstandings",
+      "Document consistently; avoid language that differs from the tone of the meeting",
+    ],
+    "declining-request": [
+      "Ensure the rationale is consistent with how similar requests have been handled",
+      "Avoid language that could be perceived as dismissive or punitive",
+      "Consider whether the request relates to a protected ground requiring accommodation",
+      "Document the request, rationale, and decision",
+      "Offer alternatives where appropriate to reduce perception of rigidity",
+    ],
+    "resetting-expectations": [
+      "Ensure new expectations are documented and consistently applied",
+      "Avoid framing that could be seen as retaliation or targeting",
+      "Consider whether prior expectations were clearly communicated",
+      "Focus forward; do not relitigate past issues in a way that escalates conflict",
+      "Document the conversation and provide written confirmation of expectations",
+    ],
+  };
+
+  const defaultRisks = [
+    "Review message for tone that could escalate conflict or be perceived as threatening",
+    "Ensure documentation captures key points without subjective commentary",
+    "Consider timing and delivery method for the communication",
+    "Confirm approach is consistent with how similar situations have been handled",
+  ];
+
+  const risks = riskChecks[scenario] || defaultRisks;
+  
+  // Add tone-specific considerations
+  const toneRisks: string[] = [];
+  if (tone === "firm") {
+    toneRisks.push("Firm tone may be appropriate but ensure it does not cross into intimidation");
+  }
+  if (tone === "compassionate" || tone === "supportive") {
+    toneRisks.push("Supportive tone is positive but avoid over-promising or creating implied commitments");
+  }
+
+  // Add context-specific consideration if context provided
+  if (context && context.length > 0) {
+    toneRisks.push("Custom context provided—ensure any specifics are appropriate to include in documentation");
+  }
+
+  const allRisks = [...risks.slice(0, 4), ...toneRisks].slice(0, 6);
+  
+  return allRisks.map(risk => `• ${risk}`).join("\n");
+};
+
 export function DraftGenerator() {
   const [scenarioType, setScenarioType] = useState("");
   const [tone, setTone] = useState("");
@@ -386,6 +522,7 @@ export function DraftGenerator() {
     draftMessage: string;
     talkingPoints: string;
     documentationNote: string;
+    riskCheck: string;
   } | null>(null);
 
   const handleGenerate = async () => {
@@ -397,7 +534,8 @@ export function DraftGenerator() {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const result = generateDraft(scenarioType, tone, context);
-    setOutput(result);
+    const riskCheck = generateRiskCheck(scenarioType, tone, context);
+    setOutput({ ...result, riskCheck });
     setIsGenerating(false);
   };
 
@@ -520,6 +658,13 @@ export function DraftGenerator() {
             content={output.documentationNote}
             icon={<FileText className="w-4 h-4" />}
             delay={300}
+            isVisible={!!output}
+          />
+          <OutputCard
+            title="Risk Check"
+            content={output.riskCheck}
+            icon={<ShieldAlert className="w-4 h-4" />}
+            delay={450}
             isVisible={!!output}
           />
         </div>
