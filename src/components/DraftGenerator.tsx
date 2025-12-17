@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert } from "lucide-react";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -546,11 +546,126 @@ const generateRiskCheck = (scenario: string, tone: string, context: string): { r
   };
 };
 
+const generateSaferVersion = (originalMessage: string, scenario: string): string => {
+  // Safer version templates that preserve intent, soften tone, remove assumptions, add empathy
+  // Guardrail: Never imply discipline, termination, or legal compliance
+  
+  const saferTemplates: Record<string, string> = {
+    "performance-concern": `Dear [Employee Name],
+
+I hope this message finds you well. I wanted to reach out to schedule a conversation with you.
+
+My goal is to check in on how things are going and to understand if there's anything I can do to better support you in your role. This is meant to be a two-way conversation where we can discuss your experience, any challenges you might be facing, and how we can work together going forward.
+
+Please let me know what times work best for you over the next few days.
+
+Warm regards,
+[Manager Name]`,
+    "attendance-issue": `Dear [Employee Name],
+
+I wanted to reach out to schedule a brief conversation with you.
+
+I'd like to understand your perspective on recent scheduling and to discuss how we can work together to meet operational needs while supporting your situation. This is not about assigning blame—it's about finding a path forward that works for everyone.
+
+Please let me know your availability.
+
+Warm regards,
+[Manager Name]`,
+    "accommodation-request": `Dear [Employee Name],
+
+Thank you for reaching out. I want you to know that I take your request seriously and am committed to exploring options that work for both you and the team.
+
+Let's schedule a time to have a confidential conversation about how we can best support you. There's no need to share more than you're comfortable with—we can focus on practical solutions.
+
+I'll follow up shortly to arrange a time that works for you.
+
+Warm regards,
+[Manager Name]`,
+    "mental-health-disclosure": `Dear [Employee Name],
+
+Thank you for trusting me with this. I want you to know that your wellbeing matters, and this conversation will remain confidential.
+
+I'm here to listen and to explore any adjustments that might help you feel more supported at work. There's no pressure to share anything beyond what you choose to.
+
+If and when you're ready, I'm available to talk. In the meantime, please know that our Employee Assistance Program is available if you'd find it helpful.
+
+Take care,
+[Manager Name]`,
+    "return-to-work": `Dear [Employee Name],
+
+Welcome back—it's good to have you returning. I hope you're feeling ready, and I want to make sure your transition back is as smooth as possible.
+
+Let's find a time to connect so I can catch you up on what's been happening and learn about any support you might need. There's no rush, and we can take things at whatever pace works for you.
+
+Looking forward to seeing you.
+
+Warm regards,
+[Manager Name]`,
+    "termination": `Dear [Employee Name],
+
+I'm writing to follow up on our conversation regarding the changes to your employment.
+
+I recognize this is a significant transition, and I want to ensure you have the information you need. Please find attached the relevant details. If you have any questions, HR is available to assist.
+
+I wish you the very best going forward.
+
+Sincerely,
+[Manager Name]`,
+    "difficult-timing": `Dear [Employee Name],
+
+I recognize this might not feel like the ideal time, and I want to acknowledge that. I wouldn't be reaching out if it weren't important.
+
+There's a matter I'd like to discuss with you—not urgently, but soon. My goal is to have a thoughtful conversation, and I'm happy to work around your schedule.
+
+Would you be open to finding a time this week or early next?
+
+Warm regards,
+[Manager Name]`,
+    "conflict-resolution": `Dear [Employee Name],
+
+I'd like to schedule a conversation with you about a workplace matter. My goal is simply to understand different perspectives and to find a constructive path forward.
+
+This is not about assigning fault—it's about ensuring everyone feels heard and that we can work well together as a team.
+
+Could you let me know when you'd be available for a confidential conversation?
+
+Thank you,
+[Manager Name]`,
+    "probation-review": `Dear [Employee Name],
+
+As we approach the end of your initial period with us, I'd like to schedule a conversation to reflect on how things have been going from your perspective and mine.
+
+This is an opportunity for us to discuss your experience, what's been working well, and any areas where additional support might be helpful. My goal is for us both to leave the conversation with clarity about next steps.
+
+Please let me know your availability.
+
+Warm regards,
+[Manager Name]`,
+  };
+
+  // Return safer version if available, otherwise apply general softening
+  if (saferTemplates[scenario]) {
+    return saferTemplates[scenario];
+  }
+
+  // Generic safer transformation for scenarios without specific templates
+  return originalMessage
+    .replace(/I need to/gi, "I'd like to")
+    .replace(/You must/gi, "It would be helpful if you could")
+    .replace(/required/gi, "requested")
+    .replace(/immediately/gi, "when you're able")
+    .replace(/failure to/gi, "if we're unable to")
+    .replace(/consequences/gi, "next steps")
+    .replace(/Regards,/g, "Warm regards,");
+};
+
 export function DraftGenerator() {
   const [scenarioType, setScenarioType] = useState("");
   const [tone, setTone] = useState("");
   const [context, setContext] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingSafer, setIsGeneratingSafer] = useState(false);
+  const [saferVersion, setSaferVersion] = useState<string | null>(null);
   const [output, setOutput] = useState<{
     draftMessage: string;
     talkingPoints: string;
@@ -564,6 +679,7 @@ export function DraftGenerator() {
 
     setIsGenerating(true);
     setOutput(null);
+    setSaferVersion(null);
 
     await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -571,6 +687,18 @@ export function DraftGenerator() {
     const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context);
     setOutput({ ...result, riskCheck, riskLevel });
     setIsGenerating(false);
+  };
+
+  const handleGenerateSafer = async () => {
+    if (!output) return;
+
+    setIsGeneratingSafer(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const safer = generateSaferVersion(output.draftMessage, scenarioType);
+    setSaferVersion(safer);
+    setIsGeneratingSafer(false);
   };
 
   const canGenerate = scenarioType && tone;
@@ -712,6 +840,46 @@ export function DraftGenerator() {
               </span>
             }
           />
+
+          {/* Generate Safer Version Button */}
+          {!saferVersion && (
+            <div className="flex justify-center opacity-0 animate-slide-up" style={{ animationDelay: "600ms", animationFillMode: "forwards" }}>
+              <Button
+                onClick={handleGenerateSafer}
+                disabled={isGeneratingSafer}
+                variant="outline"
+                className="gap-2"
+              >
+                {isGeneratingSafer ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Generate Safer Version
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Safer Version Output */}
+          {saferVersion && (
+            <OutputCard
+              title="Safer Version"
+              content={saferVersion}
+              icon={<RefreshCw className="w-4 h-4" />}
+              delay={0}
+              isVisible={!!saferVersion}
+              headerContent={
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                  Softened Tone
+                </span>
+              }
+            />
+          )}
         </div>
       )}
     </div>
