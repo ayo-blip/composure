@@ -1,0 +1,7 @@
+project_id = "qncmacphmulzillhufvj"
+
+[functions.generate-draft]
+verify_jwt = false
+
+[functions.generate-safer]
+verify_jwt = false
