@@ -14,7 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saved_drafts: {
+        Row: {
+          confidence_score: number
+          confidence_strengths: string[]
+          confidence_suggestion: string | null
+          context: string | null
+          created_at: string
+          documentation_note: string
+          draft_message: string
+          id: string
+          is_favorite: boolean | null
+          risk_check: string
+          risk_level: string
+          scenarios: string[]
+          sector: string
+          talking_points: string
+          title: string
+          tone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          confidence_score: number
+          confidence_strengths: string[]
+          confidence_suggestion?: string | null
+          context?: string | null
+          created_at?: string
+          documentation_note: string
+          draft_message: string
+          id?: string
+          is_favorite?: boolean | null
+          risk_check: string
+          risk_level: string
+          scenarios: string[]
+          sector: string
+          talking_points: string
+          title: string
+          tone: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          confidence_score?: number
+          confidence_strengths?: string[]
+          confidence_suggestion?: string | null
+          context?: string | null
+          created_at?: string
+          documentation_note?: string
+          draft_message?: string
+          id?: string
+          is_favorite?: boolean | null
+          risk_check?: string
+          risk_level?: string
+          scenarios?: string[]
+          sector?: string
+          talking_points?: string
+          title?: string
+          tone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

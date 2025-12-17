@@ -1,19 +1,60 @@
+import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, signOut, loading } = useAuth();
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-elegant">
-            <FileEdit className="w-5 h-5 text-primary-foreground" />
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-elegant">
+              <FileEdit className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="font-heading text-xl font-semibold text-foreground">Compo<span className="text-accent">Sure</span></h1>
+              <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-heading text-xl font-semibold text-foreground">Compo<span className="text-accent">Sure</span></h1>
-            <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
-          </div>
+          
+          {/* Navigation */}
+          <nav className="flex items-center gap-2">
+            {!loading && (
+              <>
+                {user ? (
+                  <>
+                    <Link to="/library">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <BookOpen className="w-4 h-4" />
+                        <span className="hidden sm:inline">Library</span>
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => signOut()}
+                      className="gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span className="hidden sm:inline">Sign Out</span>
+                    </Button>
+                  </>
+                ) : (
+                  <Link to="/auth">
+                    <Button variant="default" size="sm" className="gap-2">
+                      <LogIn className="w-4 h-4" />
+                      Sign In
+                    </Button>
+                  </Link>
+                )}
+              </>
+            )}
+          </nav>
         </div>
       </header>
 
