@@ -47,16 +47,42 @@ const sectors: { value: Sector; label: string; icon: typeof Building2 }[] = [
   { value: "unionized", label: "Unionized", icon: Users },
 ];
 
+// Transform context from third-person (talking ABOUT employee) to second-person (talking TO employee)
+const transformContextToSecondPerson = (text: string): string => {
+  if (!text) return text;
+  
+  let transformed = text
+    // Replace common third-person references with second-person
+    .replace(/\b(my employee|the employee|this employee)\b/gi, "you")
+    .replace(/\b(my staff member|the staff member)\b/gi, "you")
+    .replace(/\b(he|she) has\b/gi, "you have")
+    .replace(/\b(he|she) is\b/gi, "you are")
+    .replace(/\b(he|she) was\b/gi, "you were")
+    .replace(/\b(he|she) had\b/gi, "you had")
+    .replace(/\bhis or her\b/gi, "your")
+    .replace(/\b(his|her) (?=\w)/gi, "your ")
+    .replace(/\bthey have\b/gi, "you have")
+    .replace(/\bthey are\b/gi, "you are")
+    .replace(/\btheir (?=\w)/gi, "your ")
+    // Fix capitalization at start of sentences
+    .replace(/^you\b/i, "You")
+    .replace(/\. you\b/g, ". You");
+  
+  return transformed;
+};
+
 const generateDraft = (scenario: string, tone: string, context: string) => {
   const scenarioLabel = scenarioTypes.find(s => s.value === scenario)?.label || scenario;
   const toneLabel = tones.find(t => t.value === tone)?.label || tone;
   const contextNote = context ? `\nContext noted: ${context}` : "";
+  // Transform context to second-person for use in messages addressed TO the employee
+  const contextForMessage = transformContextToSecondPerson(context);
 
   const drafts: Record<string, { message: string; points: string; note: string }> = {
     "performance-concern": {
       message: `Dear [Employee Name],
 
-I would like to schedule a meeting with you to discuss your work and how we can support your success going forward.${context ? ` ${context}` : ""}
+I would like to schedule a meeting with you to discuss your work and how we can support your success going forward.${contextForMessage ? ` ${contextForMessage}` : ""}
 
 This is an opportunity to clarify expectations, identify any barriers, and discuss resources that might help. I'm committed to working with you on a path forward.
 
@@ -77,7 +103,7 @@ Next steps agreed. Follow-up: [date].`,
     "attendance-issue": {
       message: `Dear [Employee Name],
 
-I wanted to schedule a time to meet with you to discuss attendance and how we can ensure coverage needs are met going forward.${context ? ` ${context}` : ""}
+I wanted to schedule a time to meet with you to discuss attendance and how we can ensure coverage needs are met going forward.${contextForMessage ? ` ${contextForMessage}` : ""}
 
 This conversation is an opportunity to review expectations and explore any supports that might help. Please let me know your availability.
 
@@ -97,7 +123,7 @@ Follow-up: [date].`,
     "accommodation-request": {
       message: `Dear [Employee Name],
 
-Thank you for bringing your accommodation request to my attention.${context ? ` Regarding ${context.toLowerCase().trim()}, ` : " "}I want to ensure we explore options that support your ability to meet the requirements of your role.
+Thank you for bringing your accommodation request to my attention.${contextForMessage ? ` Regarding ${contextForMessage.toLowerCase().trim()}, ` : " "}I want to ensure we explore options that support your ability to meet the requirements of your role.
 
 Let's schedule a time to discuss functional needs and potential adjustments. This conversation will remain confidential.
 
@@ -118,7 +144,7 @@ Options explored. Outcome to be documented.`,
     "mental-health-disclosure": {
       message: `Dear [Employee Name],
 
-Thank you for sharing this with me.${context ? ` I appreciate you letting me know about ${context.toLowerCase().trim()}.` : ""} I want you to know that this conversation will remain confidential.
+Thank you for sharing this with me.${contextForMessage ? ` I appreciate you letting me know about ${contextForMessage.toLowerCase().trim()}.` : ""} I want you to know that this conversation will remain confidential.
 
 My focus is on understanding how I can support you in meeting the expectations of your role. If there are adjustments to your work or schedule that might help, I'm open to discussing options.
 
@@ -142,7 +168,7 @@ Follow-up as agreed with employee.`,
     "return-to-work": {
       message: `Dear [Employee Name],
 
-Welcome back. I'm glad to have you returning to the team.${context ? ` ${context}` : ""}
+Welcome back. I'm glad to have you returning to the team.${contextForMessage ? ` ${contextForMessage}` : ""}
 
 I'd like to meet briefly to discuss your reintegration, review current priorities, and ensure you have what you need for a smooth transition. We can also discuss any documented restrictions and how they apply to your role.
 
@@ -164,7 +190,7 @@ Check-in scheduled: [date].`,
     "leave-request": {
       message: `Dear [Employee Name],
 
-Thank you for submitting your leave request.${context ? ` Regarding ${context.toLowerCase().trim()}, ` : " "}I've received it and will review it promptly.
+Thank you for submitting your leave request.${contextForMessage ? ` Regarding ${contextForMessage.toLowerCase().trim()}, ` : " "}I've received it and will review it promptly.
 
 If I need any additional information, I'll be in touch. Please let me know if you have questions.
 
@@ -183,7 +209,7 @@ Decision communicated: [date].`,
     "conflict-resolution": {
       message: `Dear [Employee Name],
 
-I'd like to meet with you to discuss a workplace matter that has been brought to my attention.${context ? ` This relates to ${context.toLowerCase().trim()}.` : ""}
+I'd like to meet with you to discuss a workplace matter that has been brought to my attention.${contextForMessage ? ` This relates to ${contextForMessage.toLowerCase().trim()}.` : ""}
 
 My goal is to understand the situation, discuss the impact on the work environment, and clarify expectations going forward.
 
@@ -204,7 +230,7 @@ Expectations clarified. Actions agreed and documented.`,
     "policy-reminder": {
       message: `Dear Team,
 
-I wanted to remind everyone of expectations regarding [policy area].${context ? ` ${context}` : ""}
+I wanted to remind everyone of expectations regarding [policy area].${contextForMessage ? ` ${contextForMessage}` : ""}
 
 These standards help maintain a productive and respectful work environment for the entire team. If you have questions about what's expected, please reach out.
 
@@ -223,7 +249,7 @@ Individual follow-up if warranted.`,
     "check-in": {
       message: `Dear [Employee Name],
 
-I wanted to check in with you.${context ? ` ${context}` : " I've noticed some changes in work patterns recently and"} want to see if there's anything affecting your ability to meet expectations.
+I wanted to check in with you.${contextForMessage ? ` ${contextForMessage}` : " I've noticed some changes in work patterns recently and"} want to see if there's anything affecting your ability to meet expectations.
 
 There's no obligation to share personal details. If there's something impacting your work that you'd like to discuss, I'm available.
 
@@ -244,7 +270,7 @@ Supports offered. Follow-up as agreed.`,
     "probation-review": {
       message: `Dear [Employee Name],
 
-As you approach the end of your probationary period, I'd like to schedule a meeting to review your progress against the expectations for your role.${context ? ` I'd particularly like to discuss ${context.toLowerCase().trim()}.` : ""}
+As you approach the end of your probationary period, I'd like to schedule a meeting to review your progress against the expectations for your role.${contextForMessage ? ` I'd particularly like to discuss ${contextForMessage.toLowerCase().trim()}.` : ""}
 
 This is an opportunity to review what's been accomplished, discuss any gaps, and confirm next steps.
 
@@ -265,7 +291,7 @@ Outcome: [confirmed/extended/not confirmed]. Documented.`,
     "termination": {
       message: `Dear [Employee Name],
 
-I am writing to confirm our conversation regarding the end of your employment with [Organization], effective [Date].${context ? ` As discussed, ${context.toLowerCase().trim()}.` : ""}
+I am writing to confirm our conversation regarding the end of your employment with [Organization], effective [Date].${contextForMessage ? ` As discussed, ${contextForMessage.toLowerCase().trim()}.` : ""}
 
 Attached is information regarding your final pay, benefits, and other relevant matters. For questions, please contact HR at [contact info].
 
@@ -286,7 +312,7 @@ Final pay and ROE processed.`,
     "difficult-timing": {
       message: `Dear [Employee Name],
 
-I recognize this may not feel like an ideal time for this conversation.${context ? ` ${context}` : ""} I want to acknowledge that, and I wouldn't be reaching out if it weren't important.
+I recognize this may not feel like an ideal time for this conversation.${contextForMessage ? ` ${contextForMessage}` : ""} I want to acknowledge that, and I wouldn't be reaching out if it weren't important.
 
 There's a matter we need to discuss that affects your work, and addressing it now will help us move forward together. I'm committed to having this conversation with care and respect.
 
@@ -307,7 +333,7 @@ Conversation held with care. Outcome documented.`,
     "follow-up": {
       message: `Dear [Employee Name],
 
-Thank you for taking the time to meet with me today.${context ? ` ${context}` : ""} I wanted to follow up to summarize what we discussed and confirm our agreed next steps.
+Thank you for taking the time to meet with me today.${contextForMessage ? ` ${contextForMessage}` : ""} I wanted to follow up to summarize what we discussed and confirm our agreed next steps.
 
 [Summary of key points discussed]
 
@@ -334,7 +360,7 @@ Next steps: [actions and dates]. Follow-up: [date].`,
     "declining-request": {
       message: `Dear [Employee Name],
 
-Thank you for your request regarding [subject].${context ? ` ${context}` : ""} I've given it careful consideration.
+Thank you for your request regarding [subject].${contextForMessage ? ` ${contextForMessage}` : ""} I've given it careful consideration.
 
 Unfortunately, I'm not able to approve this request. [Brief rationale—e.g., operational needs, policy constraints, timing].
 
@@ -355,7 +381,7 @@ Alternatives discussed: [yes/no]. Follow-up offered.`,
     "resetting-expectations": {
       message: `Dear [Employee Name],
 
-I'd like to meet with you to clarify expectations for your role going forward.${context ? ` ${context}` : ""}
+I'd like to meet with you to clarify expectations for your role going forward.${contextForMessage ? ` ${contextForMessage}` : ""}
 
 This is an opportunity to ensure we're aligned on priorities, standards, and how success will be measured. My goal is to set you up for success with clear, consistent expectations.
 
