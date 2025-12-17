@@ -26,6 +26,7 @@ const scenarioTypes = [
   { value: "termination", label: "Employment Ending" },
   { value: "difficult-timing", label: "Difficult Timing" },
   { value: "follow-up", label: "Follow-Up After Meeting" },
+  { value: "declining-request", label: "Declining a Request" },
 ];
 
 const tones = [
@@ -320,6 +321,27 @@ Best regards,
 Tone: ${toneLabel}. Meeting date: [date].${contextNote}
 Summary: [key points]. Expectations restated.
 Next steps: [actions and dates]. Follow-up: [date].`,
+    },
+    "declining-request": {
+      message: `Dear [Employee Name],
+
+Thank you for your request regarding [subject].${context ? ` ${context}` : ""} I've given it careful consideration.
+
+Unfortunately, I'm not able to approve this request. [Brief rationale—e.g., operational needs, policy constraints, timing].
+
+I understand this may be disappointing. If you'd like to discuss alternatives or have questions, I'm happy to talk further.
+
+Regards,
+[Manager Name]`,
+      points: `• Acknowledge the request and thank them for raising it
+• State the decision clearly and early—don't bury it
+• Provide a brief, honest rationale without over-explaining or being defensive
+• Avoid excessive apologies that undermine the decision
+• Offer to discuss alternatives or answer questions if appropriate`,
+      note: `Request from [Employee Name] declined.
+Tone: ${toneLabel}. Request type: [subject].${contextNote}
+Rationale: [brief reason]. Decision communicated respectfully.
+Alternatives discussed: [yes/no]. Follow-up offered.`,
     },
   };
 
