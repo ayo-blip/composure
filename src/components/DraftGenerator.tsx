@@ -44,23 +44,23 @@ const generateDraft = (scenario: string, tone: string, context: string) => {
     "performance-concern": {
       message: `Dear [Employee Name],
 
-I would like to schedule a meeting with you to discuss current work outputs and expectations for your role.${context ? ` I wanted to touch base regarding ${context.toLowerCase().trim()}.` : ""}
+I would like to schedule a meeting with you to discuss your work and how we can support your success going forward.${context ? ` ${context}` : ""}
 
-This is an opportunity to review priorities, clarify what's needed going forward, and discuss any supports that might help.
+This is an opportunity to clarify expectations, identify any barriers, and discuss resources that might help. I'm committed to working with you on a path forward.
 
 Please let me know your availability over the next few days.
 
 Regards,
 [Manager Name]`,
-      points: `• Describe specific conduct: missed deadlines, incomplete deliverables, or process gaps
-• Explain the impact: effect on team workload, project timelines, or client service
-• Clarify expectations: what success looks like going forward
-• Ask about barriers and explore supports
-• Agree on measurable actions and a follow-up date`,
-      note: `Meeting with [Employee Name] re: performance expectations.
-Tone: ${toneLabel}. Conduct discussed: [specific items].
-Impact: [effect on team/work]. Expectations clarified.${contextNote}
-Next steps agreed. Follow-up scheduled: [date].`,
+      points: `• Clarify expectations: what success looks like in specific, measurable terms
+• Identify gaps: describe the difference between current output and expectations
+• Explore barriers: ask what's getting in the way and listen without judgment
+• Discuss supports: training, resources, workload adjustments, clearer direction
+• Agree on next steps: specific actions, timelines, and a follow-up date`,
+      note: `Meeting with [Employee Name] re: performance discussion.
+Tone: ${toneLabel}. Focus: Clarity, support, and next steps.${contextNote}
+Expectations clarified. Barriers explored. Supports discussed.
+Next steps agreed. Follow-up: [date].`,
     },
     "attendance-issue": {
       message: `Dear [Employee Name],
