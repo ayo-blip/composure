@@ -9,9 +9,33 @@ interface OutputCardProps {
   delay?: number;
   isVisible: boolean;
   headerContent?: React.ReactNode;
+  highlightPlaceholders?: boolean;
 }
 
-export function OutputCard({ title, content, icon, delay = 0, isVisible, headerContent }: OutputCardProps) {
+// Function to highlight placeholders like [Employee Name], [Manager Name], [Date], etc.
+const renderContentWithPlaceholders = (content: string, highlight: boolean) => {
+  if (!highlight) return content;
+  
+  const placeholderRegex = /\[([^\]]+)\]/g;
+  const parts = content.split(placeholderRegex);
+  
+  return parts.map((part, index) => {
+    // Every odd index is a captured group (the placeholder content)
+    if (index % 2 === 1) {
+      return (
+        <span
+          key={index}
+          className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-1 py-0.5 rounded font-medium"
+        >
+          [{part}]
+        </span>
+      );
+    }
+    return part;
+  });
+};
+
+export function OutputCard({ title, content, icon, delay = 0, isVisible, headerContent, highlightPlaceholders = false }: OutputCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -21,6 +45,8 @@ export function OutputCard({ title, content, icon, delay = 0, isVisible, headerC
   };
 
   if (!isVisible) return null;
+
+  const hasPlaceholders = highlightPlaceholders && /\[[^\]]+\]/.test(content);
 
   return (
     <div
@@ -48,8 +74,14 @@ export function OutputCard({ title, content, icon, delay = 0, isVisible, headerC
       </div>
       <div className="p-5">
         <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap font-body text-sm">
-          {content}
+          {renderContentWithPlaceholders(content, highlightPlaceholders)}
         </p>
+        {hasPlaceholders && (
+          <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+            <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+            Replace highlighted placeholders with actual names before sending
+          </p>
+        )}
       </div>
     </div>
   );

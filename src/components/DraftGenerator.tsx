@@ -957,6 +957,7 @@ export function DraftGenerator() {
             icon={<MessageSquare className="w-4 h-4" />}
             delay={0}
             isVisible={!!output}
+            highlightPlaceholders={true}
           />
           <OutputCard
             title="Key Talking Points"
@@ -971,6 +972,7 @@ export function DraftGenerator() {
             icon={<FileText className="w-4 h-4" />}
             delay={300}
             isVisible={!!output}
+            highlightPlaceholders={true}
           />
           <OutputCard
             title="Risk Check"
@@ -1103,6 +1105,7 @@ export function DraftGenerator() {
               icon={<RefreshCw className="w-4 h-4" />}
               delay={0}
               isVisible={!!saferVersion}
+              highlightPlaceholders={true}
               headerContent={
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
                   Softened Tone
