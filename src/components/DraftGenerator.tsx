@@ -928,36 +928,70 @@ export function DraftGenerator() {
         <div className="grid gap-6">
           {/* Dropdowns Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label className="text-sm font-medium text-foreground">
-                Scenario Type <span className="text-muted-foreground font-normal">(select up to 3)</span>
+                Scenario Type {selectedScenarios.length > 0 && <span className="text-muted-foreground font-normal">({selectedScenarios.length}/3)</span>}
               </Label>
-              <div className="flex flex-wrap gap-2">
-                {scenarioTypes.map((scenario) => {
-                  const isSelected = selectedScenarios.includes(scenario.value);
-                  const selectionIndex = selectedScenarios.indexOf(scenario.value);
-                  return (
-                    <button
-                      key={scenario.value}
-                      type="button"
-                      onClick={() => toggleScenario(scenario.value)}
-                      className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all duration-200 ${
-                        isSelected
-                          ? "bg-primary text-primary-foreground border-primary"
-                          : "bg-background text-muted-foreground border-border hover:border-muted-foreground/50 hover:text-foreground"
-                      }`}
-                    >
-                      {isSelected && selectionIndex === 0 && <span className="mr-1 text-xs opacity-75">①</span>}
-                      {isSelected && selectionIndex === 1 && <span className="mr-1 text-xs opacity-75">②</span>}
-                      {isSelected && selectionIndex === 2 && <span className="mr-1 text-xs opacity-75">③</span>}
-                      {scenario.label}
-                    </button>
-                  );
-                })}
-              </div>
+              
+              {/* Selected scenarios as chips */}
+              {selectedScenarios.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {selectedScenarios.map((scenarioValue, index) => {
+                    const scenario = scenarioTypes.find(s => s.value === scenarioValue);
+                    return (
+                      <div
+                        key={scenarioValue}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-sm font-medium"
+                      >
+                        {index === 0 && <span className="text-xs opacity-75">Primary:</span>}
+                        {scenario?.label}
+                        <button
+                          type="button"
+                          onClick={() => toggleScenario(scenarioValue)}
+                          className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5 transition-colors"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {/* Dropdown to add scenarios */}
+              {selectedScenarios.length < 3 && (
+                <Select 
+                  value="" 
+                  onValueChange={(value) => {
+                    if (value && !selectedScenarios.includes(value)) {
+                      toggleScenario(value);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="h-12 bg-background border-border hover:border-muted-foreground/50 transition-colors">
+                    <SelectValue placeholder={selectedScenarios.length === 0 ? "Select scenario..." : "Add another scenario..."} />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border max-h-[300px]">
+                    {scenarioTypes
+                      .filter(scenario => !selectedScenarios.includes(scenario.value))
+                      .map((scenario) => (
+                        <SelectItem 
+                          key={scenario.value} 
+                          value={scenario.value}
+                          className="cursor-pointer hover:bg-secondary"
+                        >
+                          {scenario.label}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              )}
+              
               {selectedScenarios.length > 1 && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Primary: {scenarioTypes.find(s => s.value === selectedScenarios[0])?.label} • Draft will blend considerations from all selected scenarios
+                <p className="text-xs text-muted-foreground">
+                  Draft will blend considerations from all selected scenarios
                 </p>
               )}
             </div>
