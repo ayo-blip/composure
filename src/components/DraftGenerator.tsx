@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp } from "lucide-react";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -37,6 +37,14 @@ const tones = [
   { value: "firm", label: "Firm but Fair" },
   { value: "compassionate", label: "Compassionate" },
   { value: "professional", label: "Formal Professional" },
+];
+
+type Sector = "private" | "public" | "unionized";
+
+const sectors: { value: Sector; label: string; icon: typeof Building2 }[] = [
+  { value: "private", label: "Private Sector", icon: Building2 },
+  { value: "public", label: "Public Sector", icon: Landmark },
+  { value: "unionized", label: "Unionized", icon: Users },
 ];
 
 const generateDraft = (scenario: string, tone: string, context: string) => {
@@ -379,7 +387,7 @@ Follow-up: [date].`,
 
 type RiskLevel = "Low" | "Moderate" | "High";
 
-const generateRiskCheck = (scenario: string, tone: string, context: string): { riskCheck: string; riskLevel: RiskLevel } => {
+const generateRiskCheck = (scenario: string, tone: string, context: string, sector: Sector): { riskCheck: string; riskLevel: RiskLevel } => {
   // Determine risk level based on scenario characteristics
   const highRiskScenarios = ["termination", "mental-health-disclosure", "accommodation-request"];
   const moderateRiskScenarios = ["performance-concern", "attendance-issue", "probation-review", "conflict-resolution", "difficult-timing", "resetting-expectations"];
@@ -405,6 +413,11 @@ const generateRiskCheck = (scenario: string, tone: string, context: string): { r
   
   // Firm tone can elevate risk
   if (tone === "firm" && riskLevel !== "High") {
+    riskLevel = riskLevel === "Low" ? "Moderate" : "High";
+  }
+
+  // Sector-based risk elevation (public and unionized are more conservative)
+  if ((sector === "public" || sector === "unionized") && riskLevel !== "High") {
     riskLevel = riskLevel === "Low" ? "Moderate" : "High";
   }
 
@@ -538,7 +551,17 @@ const generateRiskCheck = (scenario: string, tone: string, context: string): { r
     toneRisks.push("Custom context provided—ensure any specifics are appropriate to include in documentation");
   }
 
-  const allRisks = [...risks.slice(0, 4), ...toneRisks].slice(0, 6);
+  // Add sector-specific considerations
+  const sectorRisks: string[] = [];
+  if (sector === "public") {
+    sectorRisks.push("Public sector context: Ensure compliance with applicable policies and collective agreements");
+    sectorRisks.push("Consider heightened documentation requirements and transparency obligations");
+  } else if (sector === "unionized") {
+    sectorRisks.push("Unionized environment: Review collective agreement provisions before proceeding");
+    sectorRisks.push("Consider union involvement and ensure process aligns with grievance procedures");
+  }
+
+  const allRisks = [...risks.slice(0, 3), ...sectorRisks, ...toneRisks].slice(0, 6);
   
   return {
     riskCheck: allRisks.map(risk => `• ${risk}`).join("\n"),
@@ -552,11 +575,19 @@ type ConfidenceScore = {
   suggestion: string | null;
 };
 
-const generateConfidenceScore = (scenario: string, tone: string, riskLevel: RiskLevel): ConfidenceScore => {
+const generateConfidenceScore = (scenario: string, tone: string, riskLevel: RiskLevel, sector: Sector): ConfidenceScore => {
   // Base score starts at 7.0
   let score = 7.0;
   const strengths: string[] = [];
   let suggestion: string | null = null;
+
+  // Sector adjustments (conservative sectors lower base confidence)
+  if (sector === "public" || sector === "unionized") {
+    score -= 0.5;
+    if (sector === "unionized") {
+      suggestion = "Consider consulting union representative or HR";
+    }
+  }
 
   // Tone bonuses
   if (tone === "supportive" || tone === "compassionate") {
@@ -729,6 +760,7 @@ Warm regards,
 export function DraftGenerator() {
   const [scenarioType, setScenarioType] = useState("");
   const [tone, setTone] = useState("");
+  const [sector, setSector] = useState<Sector>("private");
   const [context, setContext] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingSafer, setIsGeneratingSafer] = useState(false);
@@ -752,8 +784,8 @@ export function DraftGenerator() {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const result = generateDraft(scenarioType, tone, context);
-    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context);
-    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel);
+    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context, sector);
+    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel, sector);
     setOutput({ ...result, riskCheck, riskLevel, confidence });
     setIsGenerating(false);
   };
@@ -828,6 +860,38 @@ export function DraftGenerator() {
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          {/* Sector Toggle */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium text-foreground">
+              Sector
+            </Label>
+            <div className="flex flex-wrap gap-2">
+              {sectors.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <button
+                    key={s.value}
+                    type="button"
+                    onClick={() => setSector(s.value)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                      sector === s.value
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background text-muted-foreground border-border hover:border-muted-foreground/50 hover:text-foreground"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+            {(sector === "public" || sector === "unionized") && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                More conservative risk lens applied for {sector === "public" ? "public sector" : "unionized"} environment
+              </p>
+            )}
           </div>
 
           {/* Context Textarea */}
