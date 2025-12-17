@@ -130,23 +130,24 @@ Follow-up as agreed with employee.`,
     "return-to-work": {
       message: `Dear [Employee Name],
 
-Welcome back. I'm pleased to have you returning to the team.${context ? ` I understand ${context.toLowerCase().trim()}.` : ""}
+Welcome back. I'm glad to have you returning to the team.${context ? ` ${context}` : ""}
 
-Before your return, I'd like to meet briefly to review current priorities and discuss expectations for your transition period.
+I'd like to meet briefly to discuss your reintegration, review current priorities, and ensure you have what you need for a smooth transition. We can also discuss any documented restrictions and how they apply to your role.
 
 Please let me know your availability.
 
-Looking forward to seeing you,
+Best regards,
 [Manager Name]`,
-      points: `• Review current work priorities and team needs
-• Clarify any documented restrictions and their impact on duties
-• Discuss expectations for the transition period
-• Identify key deliverables and timelines
-• Establish check-in points to assess progress`,
+      points: `• Welcome the employee and focus on reintegration
+• Review current work priorities and what's changed during their absence
+• Discuss any documented work restrictions and how they affect duties
+• Clarify expectations for the transition period without overcommitting
+• Do not promise specific accommodations—refer to HR if formal process needed`,
       note: `Return-to-work meeting for [Employee Name].
-Tone: ${toneLabel}. Priorities reviewed.${contextNote}
-Expectations for transition clarified.
-Modified duties (if any) documented. Check-in scheduled.`,
+Tone: ${toneLabel}. Focus: Reintegration and expectations.${contextNote}
+Documented restrictions reviewed. Expectations clarified.
+Accommodations (if any) subject to formal process.
+Check-in scheduled: [date].`,
     },
     "leave-request": {
       message: `Dear [Employee Name],
