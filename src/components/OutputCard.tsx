@@ -8,9 +8,10 @@ interface OutputCardProps {
   icon: React.ReactNode;
   delay?: number;
   isVisible: boolean;
+  headerContent?: React.ReactNode;
 }
 
-export function OutputCard({ title, content, icon, delay = 0, isVisible }: OutputCardProps) {
+export function OutputCard({ title, content, icon, delay = 0, isVisible, headerContent }: OutputCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -35,6 +36,7 @@ export function OutputCard({ title, content, icon, delay = 0, isVisible }: Outpu
             {icon}
           </div>
           <h3 className="font-heading text-lg font-semibold text-foreground">{title}</h3>
+          {headerContent && <div className="ml-2">{headerContent}</div>}
         </div>
         <button
           onClick={handleCopy}
