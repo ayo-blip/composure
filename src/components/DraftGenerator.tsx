@@ -52,18 +52,40 @@ const transformContextToSecondPerson = (text: string): string => {
   if (!text) return text;
   
   let transformed = text
-    // Replace common third-person references with second-person
-    .replace(/\b(my employee|the employee|this employee)\b/gi, "you")
-    .replace(/\b(my staff member|the staff member)\b/gi, "you")
+    // Handle "my employee/the employee/this employee" + verb combinations first (for correct conjugation)
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) has\b/gi, "you have")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) is\b/gi, "you are")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) was\b/gi, "you were")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) had\b/gi, "you had")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) does\b/gi, "you do")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) doesn't\b/gi, "you don't")
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member) did\b/gi, "you did")
+    // Replace remaining standalone references
+    .replace(/\b(my employee|the employee|this employee|my staff member|the staff member)\b/gi, "you")
+    // Handle he/she + verb combinations
     .replace(/\b(he|she) has\b/gi, "you have")
     .replace(/\b(he|she) is\b/gi, "you are")
     .replace(/\b(he|she) was\b/gi, "you were")
     .replace(/\b(he|she) had\b/gi, "you had")
+    .replace(/\b(he|she) does\b/gi, "you do")
+    .replace(/\b(he|she) doesn't\b/gi, "you don't")
+    .replace(/\b(he|she) did\b/gi, "you did")
+    .replace(/\b(he|she) disclosed\b/gi, "you disclosed")
+    .replace(/\b(he|she) mentioned\b/gi, "you mentioned")
+    .replace(/\b(he|she) said\b/gi, "you said")
+    .replace(/\b(he|she) told\b/gi, "you told")
+    .replace(/\b(he|she) shared\b/gi, "you shared")
+    // Handle standalone he/she (when referring to the employee)
+    .replace(/\b(he|she)\b/gi, "you")
+    // Handle possessives
     .replace(/\bhis or her\b/gi, "your")
-    .replace(/\b(his|her) (?=\w)/gi, "your ")
+    .replace(/\b(his|her)\b/gi, "your")
+    // Handle they (when used as singular for employee)
     .replace(/\bthey have\b/gi, "you have")
     .replace(/\bthey are\b/gi, "you are")
-    .replace(/\btheir (?=\w)/gi, "your ")
+    .replace(/\btheir\b/gi, "your")
+    // Fix double spaces that might result
+    .replace(/  +/g, " ")
     // Fix capitalization at start of sentences
     .replace(/^you\b/i, "You")
     .replace(/\. you\b/g, ". You");
