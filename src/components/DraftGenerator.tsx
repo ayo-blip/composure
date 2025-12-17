@@ -435,7 +435,7 @@ Follow-up: [date].`,
 
 type RiskLevel = "Low" | "Moderate" | "High";
 
-const generateRiskCheck = (scenario: string, tone: string, context: string, sector: Sector): { riskCheck: string; riskLevel: RiskLevel } => {
+const generateRiskCheck = (scenario: string, tone: string, context: string, sector: Sector, allScenarios: string[] = []): { riskCheck: string; riskLevel: RiskLevel } => {
   // Determine risk level based on scenario characteristics
   const highRiskScenarios = ["termination", "mental-health-disclosure", "accommodation-request"];
   const moderateRiskScenarios = ["performance-concern", "attendance-issue", "probation-review", "conflict-resolution", "difficult-timing", "resetting-expectations"];
@@ -447,6 +447,17 @@ const generateRiskCheck = (scenario: string, tone: string, context: string, sect
     riskLevel = "High";
   } else if (moderateRiskScenarios.includes(scenario)) {
     riskLevel = "Moderate";
+  }
+
+  // Check if any secondary scenarios are high risk
+  if (allScenarios.length > 1) {
+    const hasHighRiskSecondary = allScenarios.slice(1).some(s => highRiskScenarios.includes(s));
+    const hasModerateRiskSecondary = allScenarios.slice(1).some(s => moderateRiskScenarios.includes(s));
+    if (hasHighRiskSecondary && riskLevel !== "High") {
+      riskLevel = "High";
+    } else if (hasModerateRiskSecondary && riskLevel === "Low") {
+      riskLevel = "Moderate";
+    }
   }
   
   // Elevate risk if context contains sensitive keywords
@@ -623,16 +634,25 @@ type ConfidenceScore = {
   suggestion: string | null;
 };
 
-const generateConfidenceScore = (scenario: string, tone: string, riskLevel: RiskLevel, sector: Sector): ConfidenceScore => {
+const generateConfidenceScore = (scenario: string, tone: string, riskLevel: RiskLevel, sector: Sector, scenarioCount: number = 1): ConfidenceScore => {
   // Base score starts at 7.0
   let score = 7.0;
   const strengths: string[] = [];
   let suggestion: string | null = null;
 
+  // Multi-scenario complexity adjustment
+  if (scenarioCount > 1) {
+    score -= 0.3 * (scenarioCount - 1);
+    strengths.push("Addresses multiple overlapping concerns");
+    if (scenarioCount >= 3) {
+      suggestion = "Complex situation—consider breaking into separate conversations";
+    }
+  }
+
   // Sector adjustments (conservative sectors lower base confidence)
   if (sector === "public" || sector === "unionized") {
     score -= 0.5;
-    if (sector === "unionized") {
+    if (sector === "unionized" && !suggestion) {
       suggestion = "Consider consulting union representative or HR";
     }
   }
@@ -661,7 +681,7 @@ const generateConfidenceScore = (scenario: string, tone: string, riskLevel: Risk
     strengths.push("Straightforward scenario with clear approach");
   } else if (higherRiskScenarios.includes(scenario)) {
     score -= 0.3;
-    suggestion = "Consider having HR review before sending";
+    if (!suggestion) suggestion = "Consider having HR review before sending";
   }
 
   // Risk level adjustments
@@ -806,7 +826,7 @@ Warm regards,
 };
 
 export function DraftGenerator() {
-  const [scenarioType, setScenarioType] = useState("");
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
   const [tone, setTone] = useState("");
   const [sector, setSector] = useState<Sector>("private");
   const [context, setContext] = useState("");
@@ -822,8 +842,21 @@ export function DraftGenerator() {
     confidence: ConfidenceScore;
   } | null>(null);
 
+  const toggleScenario = (scenarioValue: string) => {
+    setSelectedScenarios(prev => {
+      if (prev.includes(scenarioValue)) {
+        return prev.filter(s => s !== scenarioValue);
+      }
+      if (prev.length >= 3) {
+        // Replace the oldest selection with the new one
+        return [...prev.slice(1), scenarioValue];
+      }
+      return [...prev, scenarioValue];
+    });
+  };
+
   const handleGenerate = async () => {
-    if (!scenarioType || !tone) return;
+    if (selectedScenarios.length === 0 || !tone) return;
 
     setIsGenerating(true);
     setOutput(null);
@@ -832,9 +865,27 @@ export function DraftGenerator() {
 
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const result = generateDraft(scenarioType, tone, context);
-    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context, sector);
-    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel, sector);
+    // Use primary scenario for draft, blend talking points and notes
+    const primaryScenario = selectedScenarios[0];
+    const result = generateDraft(primaryScenario, tone, context);
+    
+    // If multiple scenarios, blend talking points and documentation
+    if (selectedScenarios.length > 1) {
+      const additionalPoints: string[] = [];
+      const additionalNotes: string[] = [];
+      
+      selectedScenarios.slice(1).forEach(scenario => {
+        const additional = generateDraft(scenario, tone, context);
+        additionalPoints.push(`\n\n**Additional considerations (${scenarioTypes.find(s => s.value === scenario)?.label}):**\n${additional.talkingPoints}`);
+        additionalNotes.push(`\n\n---\nRelated: ${scenarioTypes.find(s => s.value === scenario)?.label}\n${additional.documentationNote}`);
+      });
+      
+      result.talkingPoints += additionalPoints.join("");
+      result.documentationNote += additionalNotes.join("");
+    }
+    
+    const { riskCheck, riskLevel } = generateRiskCheck(primaryScenario, tone, context, sector, selectedScenarios);
+    const confidence = generateConfidenceScore(primaryScenario, tone, riskLevel, sector, selectedScenarios.length);
     setOutput({ ...result, riskCheck, riskLevel, confidence });
     setIsGenerating(false);
   };
@@ -846,7 +897,7 @@ export function DraftGenerator() {
 
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    const safer = generateSaferVersion(output.draftMessage, scenarioType);
+    const safer = generateSaferVersion(output.draftMessage, selectedScenarios[0]);
     setSaferVersion(safer);
     setIsGeneratingSafer(false);
   };
@@ -862,12 +913,13 @@ export function DraftGenerator() {
 
   const handleRerunRiskCheck = async () => {
     if (!output) return;
-    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context, sector);
-    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel, sector);
+    const primaryScenario = selectedScenarios[0];
+    const { riskCheck, riskLevel } = generateRiskCheck(primaryScenario, tone, context, sector, selectedScenarios);
+    const confidence = generateConfidenceScore(primaryScenario, tone, riskLevel, sector, selectedScenarios.length);
     setOutput({ ...output, riskCheck, riskLevel, confidence });
   };
 
-  const canGenerate = scenarioType && tone;
+  const canGenerate = selectedScenarios.length > 0 && tone;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -877,28 +929,37 @@ export function DraftGenerator() {
           {/* Dropdowns Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="scenario" className="text-sm font-medium text-foreground">
-                Scenario Type
+              <Label className="text-sm font-medium text-foreground">
+                Scenario Type <span className="text-muted-foreground font-normal">(select up to 3)</span>
               </Label>
-              <Select value={scenarioType} onValueChange={setScenarioType}>
-                <SelectTrigger 
-                  id="scenario" 
-                  className="h-12 bg-background border-border hover:border-muted-foreground/50 transition-colors"
-                >
-                  <SelectValue placeholder="Select scenario..." />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  {scenarioTypes.map((scenario) => (
-                    <SelectItem 
-                      key={scenario.value} 
-                      value={scenario.value}
-                      className="cursor-pointer hover:bg-secondary"
+              <div className="flex flex-wrap gap-2">
+                {scenarioTypes.map((scenario) => {
+                  const isSelected = selectedScenarios.includes(scenario.value);
+                  const selectionIndex = selectedScenarios.indexOf(scenario.value);
+                  return (
+                    <button
+                      key={scenario.value}
+                      type="button"
+                      onClick={() => toggleScenario(scenario.value)}
+                      className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-all duration-200 ${
+                        isSelected
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background text-muted-foreground border-border hover:border-muted-foreground/50 hover:text-foreground"
+                      }`}
                     >
+                      {isSelected && selectionIndex === 0 && <span className="mr-1 text-xs opacity-75">①</span>}
+                      {isSelected && selectionIndex === 1 && <span className="mr-1 text-xs opacity-75">②</span>}
+                      {isSelected && selectionIndex === 2 && <span className="mr-1 text-xs opacity-75">③</span>}
                       {scenario.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedScenarios.length > 1 && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  Primary: {scenarioTypes.find(s => s.value === selectedScenarios[0])?.label} • Draft will blend considerations from all selected scenarios
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
