@@ -405,11 +405,11 @@ export function DraftGenerator() {
           {/* Context Textarea */}
           <div className="space-y-2">
             <Label htmlFor="context" className="text-sm font-medium text-foreground">
-              Context <span className="text-muted-foreground font-normal">(optional)</span>
+              Optional context <span className="text-muted-foreground font-normal">(1–3 sentences, no names)</span>
             </Label>
             <Textarea
               id="context"
-              placeholder="Add situational details, observations, or specific circumstances..."
+              placeholder="e.g., employee shared personal issues, timing is sensitive, conversation already partially started"
               value={context}
               onChange={(e) => setContext(e.target.value)}
               className="min-h-[100px] bg-background border-border resize-none hover:border-muted-foreground/50 focus:border-ring transition-colors"
