@@ -24,6 +24,7 @@ const scenarioTypes = [
   { value: "check-in", label: "Wellness Check-In" },
   { value: "probation-review", label: "Probation Review" },
   { value: "termination", label: "Employment Ending" },
+  { value: "difficult-timing", label: "Difficult Timing" },
 ];
 
 const tones = [
@@ -270,6 +271,27 @@ Sincerely,
 Tone: ${toneLabel}. Reason: [documented separately].${contextNote}
 HR involved: Yes. Documentation provided.
 Final pay and ROE processed.`,
+    },
+    "difficult-timing": {
+      message: `Dear [Employee Name],
+
+I recognize this may not feel like an ideal time for this conversation.${context ? ` ${context}` : ""} I want to acknowledge that, and I wouldn't be reaching out if it weren't important.
+
+There's a matter we need to discuss that affects your work, and addressing it now will help us move forward together. I'm committed to having this conversation with care and respect.
+
+Could we find a time to meet this week?
+
+Regards,
+[Manager Name]`,
+      points: `• Acknowledge the timing is sensitive without over-apologizing
+• Explain briefly why the conversation is necessary now
+• Emphasize that delaying would create larger issues or uncertainty
+• Offer flexibility on scheduling while maintaining the need to meet
+• Focus on moving forward constructively, not dwelling on the difficulty`,
+      note: `Meeting scheduled with [Employee Name] during sensitive period.
+Tone: ${toneLabel}. Timing acknowledged.${contextNote}
+Reason for proceeding: [operational need/employee clarity/regulatory].
+Conversation held with care. Outcome documented.`,
     },
   };
 
