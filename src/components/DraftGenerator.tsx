@@ -27,6 +27,7 @@ const scenarioTypes = [
   { value: "difficult-timing", label: "Difficult Timing" },
   { value: "follow-up", label: "Follow-Up After Meeting" },
   { value: "declining-request", label: "Declining a Request" },
+  { value: "resetting-expectations", label: "Resetting Expectations" },
 ];
 
 const tones = [
@@ -342,6 +343,28 @@ Regards,
 Tone: ${toneLabel}. Request type: [subject].${contextNote}
 Rationale: [brief reason]. Decision communicated respectfully.
 Alternatives discussed: [yes/no]. Follow-up offered.`,
+    },
+    "resetting-expectations": {
+      message: `Dear [Employee Name],
+
+I'd like to meet with you to clarify expectations for your role going forward.${context ? ` ${context}` : ""}
+
+This is an opportunity to ensure we're aligned on priorities, standards, and how success will be measured. My goal is to set you up for success with clear, consistent expectations.
+
+Please let me know your availability this week.
+
+Regards,
+[Manager Name]`,
+      points: `• Be specific about what expectations are being clarified or changed
+• Explain why expectations are being reset (role evolution, prior ambiguity, performance gap)
+• Focus on the future—what success looks like from this point forward
+• Ensure expectations are measurable and consistently applied
+• Avoid relitigating past issues; keep the focus forward-looking`,
+      note: `Expectations reset with [Employee Name].
+Tone: ${toneLabel}. Reason: [role change/clarity needed/performance gap].${contextNote}
+Expectations clarified: [specific areas].
+Focus: Forward-looking, measurable standards.
+Follow-up: [date].`,
     },
   };
 
