@@ -25,6 +25,7 @@ const scenarioTypes = [
   { value: "probation-review", label: "Probation Review" },
   { value: "termination", label: "Employment Ending" },
   { value: "difficult-timing", label: "Difficult Timing" },
+  { value: "follow-up", label: "Follow-Up After Meeting" },
 ];
 
 const tones = [
@@ -292,6 +293,33 @@ Regards,
 Tone: ${toneLabel}. Timing acknowledged.${contextNote}
 Reason for proceeding: [operational need/employee clarity/regulatory].
 Conversation held with care. Outcome documented.`,
+    },
+    "follow-up": {
+      message: `Dear [Employee Name],
+
+Thank you for taking the time to meet with me today.${context ? ` ${context}` : ""} I wanted to follow up to summarize what we discussed and confirm our agreed next steps.
+
+[Summary of key points discussed]
+
+Going forward, the expectations are: [specific expectations]
+
+Next steps:
+• [Action item 1] – by [date]
+• [Action item 2] – by [date]
+
+We'll check in again on [date]. Please let me know if you have questions or concerns.
+
+Best regards,
+[Manager Name]`,
+      points: `• Summarize key points from the meeting accurately and neutrally
+• Restate expectations clearly so there's no ambiguity
+• List specific next steps with owners and timelines
+• Confirm the follow-up date
+• Keep the tone consistent with the meeting—don't escalate or soften`,
+      note: `Follow-up sent to [Employee Name] after [type of meeting].
+Tone: ${toneLabel}. Meeting date: [date].${contextNote}
+Summary: [key points]. Expectations restated.
+Next steps: [actions and dates]. Follow-up: [date].`,
     },
   };
 
