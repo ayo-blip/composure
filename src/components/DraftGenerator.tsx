@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark } from "lucide-react";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark, Copy, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -780,6 +780,7 @@ export function DraftGenerator() {
     setIsGenerating(true);
     setOutput(null);
     setSaferVersion(null);
+    setCopiedDraft(false);
 
     await new Promise((resolve) => setTimeout(resolve, 800));
 
@@ -800,6 +801,22 @@ export function DraftGenerator() {
     const safer = generateSaferVersion(output.draftMessage, scenarioType);
     setSaferVersion(safer);
     setIsGeneratingSafer(false);
+  };
+
+  const [copiedDraft, setCopiedDraft] = useState(false);
+
+  const handleCopyDraft = async () => {
+    if (!output) return;
+    await navigator.clipboard.writeText(output.draftMessage);
+    setCopiedDraft(true);
+    setTimeout(() => setCopiedDraft(false), 2000);
+  };
+
+  const handleRerunRiskCheck = async () => {
+    if (!output) return;
+    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context, sector);
+    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel, sector);
+    setOutput({ ...output, riskCheck, riskLevel, confidence });
   };
 
   const canGenerate = scenarioType && tone;
@@ -1024,9 +1041,30 @@ export function DraftGenerator() {
             </div>
           </div>
 
-          {/* Generate Safer Version Button */}
-          {!saferVersion && (
-            <div className="flex justify-center opacity-0 animate-slide-up" style={{ animationDelay: "600ms", animationFillMode: "forwards" }}>
+          {/* Action Buttons */}
+          <div 
+            className="flex flex-wrap justify-center gap-3 opacity-0 animate-slide-up" 
+            style={{ animationDelay: "600ms", animationFillMode: "forwards" }}
+          >
+            <Button
+              onClick={handleCopyDraft}
+              variant="default"
+              className="gap-2"
+            >
+              {copiedDraft ? (
+                <>
+                  <span className="text-green-500">✓</span>
+                  Copied!
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  Copy Draft
+                </>
+              )}
+            </Button>
+
+            {!saferVersion && (
               <Button
                 onClick={handleGenerateSafer}
                 disabled={isGeneratingSafer}
@@ -1045,8 +1083,17 @@ export function DraftGenerator() {
                   </>
                 )}
               </Button>
-            </div>
-          )}
+            )}
+
+            <Button
+              onClick={handleRerunRiskCheck}
+              variant="outline"
+              className="gap-2"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Run Risk Check Again
+            </Button>
+          </div>
 
           {/* Safer Version Output */}
           {saferVersion && (
