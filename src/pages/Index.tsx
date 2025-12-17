@@ -11,8 +11,8 @@ const Index = () => {
             <FileEdit className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="font-heading text-xl font-semibold text-foreground">HR Draft Assistant</h1>
-            <p className="text-xs text-muted-foreground">For Canadian workplace communications</p>
+            <h1 className="font-heading text-xl font-semibold text-foreground">Composure</h1>
+            <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
           </div>
         </div>
       </header>
@@ -22,12 +22,12 @@ const Index = () => {
         {/* Hero Section */}
         <div className="text-center mb-10 md:mb-14">
           <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4 animate-fade-in">
-            Professional HR Communications,
+            Professional Workplace Communications,
             <br />
             <span className="text-accent">Crafted with Care</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto animate-fade-in mb-6" style={{ animationDelay: "100ms" }}>
-            Generate professional, neutral, and compassionate workplace messages for Canadian public and private sector managers.
+            Generate thoughtful, professional messages for sensitive workplace conversations. Built for managers and people leaders.
           </p>
           
           {/* Guidelines Badge */}
