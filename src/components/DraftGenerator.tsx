@@ -16,6 +16,7 @@ const scenarioTypes = [
   { value: "performance-concern", label: "Performance Concern" },
   { value: "attendance-issue", label: "Attendance Issue" },
   { value: "accommodation-request", label: "Accommodation Request" },
+  { value: "mental-health-disclosure", label: "Mental Health Disclosure" },
   { value: "return-to-work", label: "Return to Work" },
   { value: "leave-request", label: "Leave Request" },
   { value: "conflict-resolution", label: "Workplace Conflict" },
@@ -102,6 +103,30 @@ Sincerely,
 Tone: ${toneLabel}. Interactive process initiated.${contextNote}
 Focus: Functional needs and job requirements.
 Options explored. Outcome to be documented.`,
+    },
+    "mental-health-disclosure": {
+      message: `Dear [Employee Name],
+
+Thank you for sharing this with me.${context ? ` I appreciate you letting me know about ${context.toLowerCase().trim()}.` : ""} I want you to know that this conversation will remain confidential.
+
+My focus is on understanding how I can support you in meeting the expectations of your role. If there are adjustments to your work or schedule that might help, I'm open to discussing options.
+
+Our Employee Assistance Program (EAP) is also available if you'd like additional support. There's no pressure to share more than you're comfortable with.
+
+Would you like to schedule a time to talk further?
+
+Best regards,
+[Manager Name]`,
+      points: `• Acknowledge the disclosure respectfully without probing for details
+• Thank them for trusting you with this information
+• Focus on work: what supports would help them meet expectations
+• Offer available resources (EAP, flex options) without pressure
+• Clarify that you don't need medical details—only functional needs`,
+      note: `[Employee Name] disclosed mental health concern.
+Tone: ${toneLabel}. Disclosure acknowledged respectfully.${contextNote}
+Focus: Workplace supports and expectations.
+Resources offered: EAP. No medical details requested or recorded.
+Follow-up as agreed with employee.`,
     },
     "return-to-work": {
       message: `Dear [Employee Name],
