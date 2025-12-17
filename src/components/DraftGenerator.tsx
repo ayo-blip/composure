@@ -65,23 +65,22 @@ Next steps agreed. Follow-up scheduled: [date].`,
     "attendance-issue": {
       message: `Dear [Employee Name],
 
-I hope you're doing well. I wanted to schedule a brief conversation about attendance patterns observed in recent weeks.${context ? ` Specifically, ${context.toLowerCase().trim()}.` : ""}
+I wanted to schedule a time to meet with you to discuss attendance and how we can ensure coverage needs are met going forward.${context ? ` ${context}` : ""}
 
-My goal is to understand the situation and discuss how we can work together to meet scheduling expectations.
-
-Please let me know a time that works for you.
+This conversation is an opportunity to review expectations and explore any supports that might help. Please let me know your availability.
 
 Best regards,
 [Manager Name]`,
-      points: `• State the conduct: specific dates, late arrivals, or unplanned absences
-• Explain the impact: coverage gaps, workload shifts for colleagues, service delays
-• Clarify expectations: attendance standards and notification requirements
-• Ask about circumstances and explore accommodations if needed
-• Agree on expectations going forward and a check-in date`,
-      note: `Meeting with [Employee Name] re: attendance.
-Tone: ${toneLabel}. Conduct: [dates/pattern observed].
-Impact: [coverage/team effect]. Expectations reviewed.${contextNote}
-Next steps agreed. Follow-up: [date].`,
+      points: `• State the pattern observed: dates, frequency, or timing of absences
+• Explain the operational impact: coverage gaps, rescheduling, effect on team or service
+• Do not question legitimacy of absences or request medical details
+• Review attendance expectations and notification procedures
+• Discuss supports available and agree on expectations going forward`,
+      note: `Meeting with [Employee Name] re: attendance pattern.
+Tone: ${toneLabel}. Pattern: [dates/frequency observed].
+Operational impact: [coverage, team workload, service].${contextNote}
+Expectations reviewed. Supports discussed.
+Follow-up: [date].`,
     },
     "accommodation-request": {
       message: `Dear [Employee Name],
