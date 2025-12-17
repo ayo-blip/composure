@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark, Copy, RotateCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark, Copy, RotateCcw, Save, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -12,6 +14,16 @@ import {
 } from "@/components/ui/select";
 import { OutputCard } from "./OutputCard";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const scenarioTypes = [
   { value: "performance-concern", label: "Performance Concern" },
@@ -56,7 +68,9 @@ const sectors: { value: Sector; label: string; icon: typeof Building2 }[] = [
 ];
 
 export function DraftGenerator() {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
   const [tone, setTone] = useState("");
   const [sector, setSector] = useState<Sector>("private");
@@ -72,6 +86,11 @@ export function DraftGenerator() {
     riskLevel: RiskLevel;
     confidence: ConfidenceScore;
   } | null>(null);
+
+  // Save dialog state
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [saveTitle, setSaveTitle] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
   const toggleScenario = (scenarioValue: string) => {
     setSelectedScenarios(prev => {
@@ -232,6 +251,62 @@ export function DraftGenerator() {
 
   const handleRegenerate = async () => {
     await handleGenerate();
+  };
+
+  const handleOpenSaveDialog = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to save drafts to your library.",
+      });
+      navigate("/auth");
+      return;
+    }
+    const primaryScenario = scenarioTypes.find(s => s.value === selectedScenarios[0]);
+    setSaveTitle(primaryScenario?.label || "Draft");
+    setShowSaveDialog(true);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!output || !user) return;
+
+    setIsSaving(true);
+
+    try {
+      const { error } = await supabase.from("saved_drafts").insert({
+        user_id: user.id,
+        title: saveTitle || "Untitled Draft",
+        scenarios: selectedScenarios,
+        tone,
+        sector,
+        context: context || null,
+        draft_message: output.draftMessage,
+        talking_points: output.talkingPoints,
+        documentation_note: output.documentationNote,
+        risk_check: output.riskCheck,
+        risk_level: output.riskLevel,
+        confidence_score: output.confidence.score,
+        confidence_strengths: output.confidence.strengths,
+        confidence_suggestion: output.confidence.suggestion,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Draft saved!",
+        description: "Your draft has been added to your library.",
+      });
+      setShowSaveDialog(false);
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      toast({
+        title: "Save failed",
+        description: "Could not save the draft. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const canGenerate = selectedScenarios.length > 0 && tone;
@@ -524,6 +599,15 @@ export function DraftGenerator() {
               )}
             </Button>
 
+            <Button
+              onClick={handleOpenSaveDialog}
+              variant="accent"
+              className="gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Save to Library
+            </Button>
+
             {!saferVersion && (
               <Button
                 onClick={handleGenerateSafer}
@@ -554,6 +638,17 @@ export function DraftGenerator() {
               <RotateCcw className="w-4 h-4" />
               Regenerate
             </Button>
+
+            {user && (
+              <Button
+                onClick={() => navigate("/library")}
+                variant="ghost"
+                className="gap-2"
+              >
+                <BookOpen className="w-4 h-4" />
+                View Library
+              </Button>
+            )}
           </div>
 
           {/* Safer Version Output */}
@@ -574,6 +669,48 @@ export function DraftGenerator() {
           )}
         </div>
       )}
+
+      {/* Save Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save to Library</DialogTitle>
+            <DialogDescription>
+              Give this draft a name so you can find it later.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="save-title" className="text-sm font-medium">
+              Draft Title
+            </Label>
+            <Input
+              id="save-title"
+              value={saveTitle}
+              onChange={(e) => setSaveTitle(e.target.value)}
+              placeholder="e.g., Performance review discussion"
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveDraft} disabled={isSaving} variant="accent">
+              {isSaving ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Draft
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
