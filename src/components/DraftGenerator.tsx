@@ -377,7 +377,37 @@ Follow-up: [date].`,
   };
 };
 
-const generateRiskCheck = (scenario: string, tone: string, context: string): string => {
+type RiskLevel = "Low" | "Moderate" | "High";
+
+const generateRiskCheck = (scenario: string, tone: string, context: string): { riskCheck: string; riskLevel: RiskLevel } => {
+  // Determine risk level based on scenario characteristics
+  const highRiskScenarios = ["termination", "mental-health-disclosure", "accommodation-request"];
+  const moderateRiskScenarios = ["performance-concern", "attendance-issue", "probation-review", "conflict-resolution", "difficult-timing", "resetting-expectations"];
+  
+  let riskLevel: RiskLevel = "Low";
+  
+  // Check scenario type
+  if (highRiskScenarios.includes(scenario)) {
+    riskLevel = "High";
+  } else if (moderateRiskScenarios.includes(scenario)) {
+    riskLevel = "Moderate";
+  }
+  
+  // Elevate risk if context contains sensitive keywords
+  if (context) {
+    const contextLower = context.toLowerCase();
+    const sensitiveTerms = ["disability", "medical", "health", "discipline", "warning", "termination", "accommodation", "harassment", "discrimination"];
+    if (sensitiveTerms.some(term => contextLower.includes(term))) {
+      if (riskLevel === "Low") riskLevel = "Moderate";
+      else if (riskLevel === "Moderate") riskLevel = "High";
+    }
+  }
+  
+  // Firm tone can elevate risk
+  if (tone === "firm" && riskLevel !== "High") {
+    riskLevel = riskLevel === "Low" ? "Moderate" : "High";
+  }
+
   const riskChecks: Record<string, string[]> = {
     "performance-concern": [
       "Consider whether performance issues may relate to an undisclosed disability or medical condition requiring accommodation",
@@ -510,7 +540,10 @@ const generateRiskCheck = (scenario: string, tone: string, context: string): str
 
   const allRisks = [...risks.slice(0, 4), ...toneRisks].slice(0, 6);
   
-  return allRisks.map(risk => `• ${risk}`).join("\n");
+  return {
+    riskCheck: allRisks.map(risk => `• ${risk}`).join("\n"),
+    riskLevel,
+  };
 };
 
 export function DraftGenerator() {
@@ -523,6 +556,7 @@ export function DraftGenerator() {
     talkingPoints: string;
     documentationNote: string;
     riskCheck: string;
+    riskLevel: RiskLevel;
   } | null>(null);
 
   const handleGenerate = async () => {
@@ -534,8 +568,8 @@ export function DraftGenerator() {
     await new Promise((resolve) => setTimeout(resolve, 800));
 
     const result = generateDraft(scenarioType, tone, context);
-    const riskCheck = generateRiskCheck(scenarioType, tone, context);
-    setOutput({ ...result, riskCheck });
+    const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context);
+    setOutput({ ...result, riskCheck, riskLevel });
     setIsGenerating(false);
   };
 
@@ -666,6 +700,17 @@ export function DraftGenerator() {
             icon={<ShieldAlert className="w-4 h-4" />}
             delay={450}
             isVisible={!!output}
+            headerContent={
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                output.riskLevel === "High" 
+                  ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" 
+                  : output.riskLevel === "Moderate"
+                  ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+              }`}>
+                Risk Level: {output.riskLevel}
+              </span>
+            }
           />
         </div>
       )}
