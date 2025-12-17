@@ -37,275 +37,206 @@ const tones = [
 const generateDraft = (scenario: string, tone: string, context: string) => {
   const scenarioLabel = scenarioTypes.find(s => s.value === scenario)?.label || scenario;
   const toneLabel = tones.find(t => t.value === tone)?.label || tone;
+  const contextNote = context ? `\nContext noted: ${context}` : "";
 
   const drafts: Record<string, { message: string; points: string; note: string }> = {
     "performance-concern": {
       message: `Dear [Employee Name],
 
-I would like to schedule a meeting with you to discuss your current work and explore how we can best support your success in your role.
+I would like to schedule a meeting with you to discuss your current work and explore how we can best support your success.${context ? ` I wanted to touch base regarding ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `I wanted to touch base regarding ${context.toLowerCase().trim()}. ` : ""}This conversation is an opportunity for us to talk openly about your work, identify any challenges you may be facing, and discuss resources or adjustments that might be helpful.
+This is an opportunity to talk openly, identify any challenges, and discuss resources or adjustments that might help.
 
-Please let me know your availability over the next few days. I am committed to working together to find solutions that support both you and our team's goals.
-
-Thank you for your continued efforts.
+Please let me know your availability over the next few days.
 
 Regards,
 [Manager Name]`,
-      points: `• Approach the conversation with curiosity, not criticism
-• Focus on observable behaviours and outcomes, not personality
+      points: `• Approach with curiosity, not criticism
+• Focus on observable behaviours and outcomes
 • Ask open-ended questions: "What's been going on?" "How can I help?"
-• Listen actively and avoid interrupting
 • Discuss specific examples without making it personal
-• Explore supports: training, workload adjustments, resources
-• Document agreed-upon next steps and timelines
-${context ? `• Address specific context: "${context}"` : ""}`,
-      note: `Meeting scheduled with [Employee Name] regarding performance.
-Tone: ${toneLabel}
-Purpose: To discuss current work performance and explore supports.
-${context ? `Context provided: ${context}` : "No additional context."}
-Approach: Collaborative problem-solving; no assumptions about cause.
-Follow-up: Document outcomes and any agreed-upon supports or timelines.`,
+• Agree on next steps and a timeline for follow-up`,
+      note: `Meeting scheduled with [Employee Name] re: performance discussion.
+Tone: ${toneLabel}. Purpose: Review current work, explore supports.${contextNote}
+Follow-up required within [timeframe].`,
     },
     "attendance-issue": {
       message: `Dear [Employee Name],
 
-I hope you're doing well. I wanted to reach out to schedule a brief conversation about attendance patterns I've noticed recently.
+I hope you're doing well. I wanted to reach out to schedule a brief conversation about attendance patterns I've noticed recently.${context ? ` Specifically, ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `Specifically, I'd like to discuss ${context.toLowerCase().trim()}. ` : ""}My goal is to understand if there are any circumstances affecting your schedule and to explore how we might work together to address them.
+My goal is to understand if there are any circumstances affecting your schedule and explore how we might address them together.
 
-Please let me know a time that works for you. This is meant to be a supportive conversation, and I'm here to help find solutions.
+Please let me know a time that works for you.
 
 Best regards,
 [Manager Name]`,
-      points: `• Start by expressing care for the employee's wellbeing
-• Present attendance observations factually without judgment
+      points: `• Express care for the employee's wellbeing first
+• Present observations factually, without judgment
 • Ask if there are circumstances you should be aware of
-• Explore whether an accommodation might be needed
-• Review applicable policies together, if appropriate
-• Discuss practical solutions collaboratively
-• Agree on next steps and a check-in date
-${context ? `• Address specific context: "${context}"` : ""}`,
-      note: `Meeting requested with [Employee Name] to discuss attendance.
-Tone: ${toneLabel}
-Approach: Supportive inquiry; exploring underlying factors.
-${context ? `Context: ${context}` : "No specific incidents noted."}
-Next steps: Document conversation outcomes and any supports offered.`,
+• Explore whether an accommodation may be needed
+• Agree on next steps and a check-in date`,
+      note: `Meeting requested with [Employee Name] re: attendance.
+Tone: ${toneLabel}. Approach: Supportive inquiry.${contextNote}
+Outcome and supports offered to be documented after meeting.`,
     },
     "accommodation-request": {
       message: `Dear [Employee Name],
 
-Thank you for bringing your accommodation request to my attention. I appreciate you sharing this information with me.
+Thank you for bringing your accommodation request to my attention.${context ? ` Regarding ${context.toLowerCase().trim()}, ` : " "}I want to ensure we engage in a meaningful process to explore how we can support your needs.
 
-${context ? `Regarding ${context.toLowerCase().trim()}, ` : ""}I want to ensure we engage in a meaningful process to explore how we can best support your needs. Let's schedule a time to discuss your request in more detail and identify potential options.
+Let's schedule a time to discuss your request and identify potential options. This conversation will remain confidential and focused on practical solutions.
 
-Please know this conversation will remain confidential and focused on finding practical solutions that work for both you and the team.
-
-I'll follow up shortly to arrange a meeting. In the meantime, please don't hesitate to reach out if you have questions.
+I'll follow up shortly to arrange a meeting.
 
 Sincerely,
 [Manager Name]`,
       points: `• Thank the employee for coming forward
-• Affirm commitment to the accommodation process
-• Do not ask for diagnosis or medical details—focus on functional limitations
-• Discuss the essential duties of the role
+• Focus on functional limitations, not diagnosis
+• Discuss essential duties of the role
 • Explore options collaboratively
-• Document the interactive process
-• Involve HR or specialists as needed
-• Follow up in writing with agreed-upon accommodations
-${context ? `• Consider context: "${context}"` : ""}`,
+• Document the interactive process`,
       note: `Accommodation request received from [Employee Name].
-Tone: ${toneLabel}
-${context ? `Details: ${context}` : "Specific details to be discussed in meeting."}
-Process: Interactive dialogue to identify suitable accommodations.
-Privacy: Medical information kept confidential.
-Next steps: Schedule meeting; document process and outcomes.`,
+Tone: ${toneLabel}. Interactive process initiated.${contextNote}
+Medical details confidential. Next: schedule meeting, document outcomes.`,
     },
     "return-to-work": {
       message: `Dear [Employee Name],
 
-Welcome back. I hope your time away was restorative, and I'm pleased to have you returning to the team.
+Welcome back. I'm pleased to have you returning to the team.${context ? ` I understand ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `I understand ${context.toLowerCase().trim()}. ` : ""}Before your return, I'd like to meet briefly to discuss how we can support your transition back to work. This may include reviewing your current workload, discussing any temporary adjustments, and ensuring you feel comfortable as you settle in.
+Before your return, I'd like to meet briefly to discuss how we can support your transition. This may include reviewing workload, discussing any temporary adjustments, and ensuring you feel comfortable.
 
-Please let me know your availability for a short meeting. I'm committed to making this transition as smooth as possible.
+Please let me know your availability.
 
 Looking forward to seeing you,
 [Manager Name]`,
       points: `• Welcome the employee warmly and genuinely
-• Avoid questions about medical details or reasons for absence
-• Focus on functional abilities and any work restrictions provided
+• Avoid questions about medical details
+• Focus on functional abilities and any work restrictions
 • Discuss graduated return options if applicable
-• Review workload and priorities together
-• Identify supports: modified duties, check-ins, resources
-• Establish a communication plan for ongoing support
-${context ? `• Consider: "${context}"` : ""}`,
-      note: `Return to work meeting scheduled for [Employee Name].
-Tone: ${toneLabel}
-${context ? `Context: ${context}` : "Standard return from leave."}
-Approach: Supportive reintegration; focus on functional capacity.
-Documentation: Record any accommodations or modified duties agreed upon.`,
+• Establish a communication plan for ongoing support`,
+      note: `Return-to-work meeting scheduled for [Employee Name].
+Tone: ${toneLabel}. Focus: Supportive reintegration.${contextNote}
+Accommodations/modified duties to be documented after meeting.`,
     },
     "leave-request": {
       message: `Dear [Employee Name],
 
-Thank you for submitting your leave request. I've received it and want to acknowledge that taking time away when needed is important.
+Thank you for submitting your leave request.${context ? ` Regarding ${context.toLowerCase().trim()}, ` : " "}I've received it and will review it promptly.
 
-${context ? `Regarding ${context.toLowerCase().trim()}, ` : ""}I will review the request and follow up with you shortly. If there are any details we need to discuss or if I require additional information to process the request, I'll be in touch.
-
-In the meantime, please don't hesitate to reach out if you have any questions.
+If I need any additional information, I'll be in touch. In the meantime, please don't hesitate to reach out with questions.
 
 Best regards,
 [Manager Name]`,
-      points: `• Acknowledge the request promptly and professionally
-• Do not ask intrusive questions about the reason for leave
-• Review applicable leave entitlements and policies
-• Communicate timelines for approval clearly
-• Discuss coverage plans for the absence
-• Provide information about any required documentation
-• Maintain confidentiality about the nature of the leave
-${context ? `• Consider: "${context}"` : ""}`,
+      points: `• Acknowledge the request promptly
+• Do not ask intrusive questions about the reason
+• Review applicable leave entitlements
+• Communicate approval timeline clearly
+• Maintain confidentiality about the nature of leave`,
       note: `Leave request received from [Employee Name].
-Tone: ${toneLabel}
-Type of leave: [To be confirmed]
-${context ? `Context: ${context}` : ""}
-Status: Under review.
-Next steps: Confirm entitlements; communicate decision; arrange coverage.`,
+Tone: ${toneLabel}. Status: Under review.${contextNote}
+Next: Confirm entitlements, communicate decision, arrange coverage.`,
     },
     "conflict-resolution": {
       message: `Dear [Employee Name],
 
-I'd like to meet with you to discuss a workplace matter that has come to my attention. My goal is to understand different perspectives and work toward a resolution that supports a respectful and productive work environment for everyone.
+I'd like to meet with you to discuss a workplace matter that has come to my attention.${context ? ` This relates to ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `This relates to ${context.toLowerCase().trim()}. ` : ""}Please know this conversation is intended to be constructive. I'm approaching this with an open mind and want to hear your perspective.
+My goal is to understand different perspectives and work toward a respectful resolution. This conversation is intended to be constructive, and I'm approaching it with an open mind.
 
-Could you please let me know your availability for a private meeting this week?
+Could you please let me know your availability this week?
 
 Thank you,
 [Manager Name]`,
-      points: `• Remain neutral—avoid taking sides prematurely
-• Meet with parties separately first to understand perspectives
-• Focus on behaviours and impacts, not intentions or character
-• Use "I" statements and encourage the same
-• Explore interests behind positions
+      points: `• Remain neutral—avoid taking sides
+• Meet with parties separately first
+• Focus on behaviours and impacts, not character
 • Identify common ground and potential solutions
-• Document the process and agreed-upon outcomes
-• Consider mediation resources if needed
-${context ? `• Address: "${context}"` : ""}`,
-      note: `Workplace conflict matter involving [Employee Name].
-Tone: ${toneLabel}
-${context ? `Situation: ${context}` : "Details to be gathered during meetings."}
-Approach: Impartial fact-finding; focus on resolution.
-Confidentiality: Maintained as appropriate.
-Next steps: Meet with all parties; document findings and outcomes.`,
+• Consider mediation resources if needed`,
+      note: `Workplace matter involving [Employee Name].
+Tone: ${toneLabel}. Approach: Impartial inquiry.${contextNote}
+Confidentiality maintained. Findings and outcomes to be documented.`,
     },
     "policy-reminder": {
       message: `Dear Team,
 
-I wanted to take a moment to remind everyone of our workplace expectations regarding [policy area].
+I wanted to remind everyone of our workplace expectations regarding [policy area].${context ? ` ${context}` : ""}
 
-${context ? `${context} ` : ""}As a team, we share responsibility for maintaining a professional and respectful environment. If you have any questions about these expectations or need clarification, please don't hesitate to reach out to me or HR.
+As a team, we share responsibility for maintaining a professional environment. If you have questions or need clarification, please reach out to me or HR.
 
-Thank you for your continued professionalism and cooperation.
+Thank you for your continued professionalism.
 
 Best regards,
 [Manager Name]`,
-      points: `• Keep the message general—avoid singling anyone out
-• Reference the policy clearly but without being heavy-handed
-• Frame as a helpful reminder, not a reprimand
-• Offer to answer questions or provide resources
-• Follow up individually if specific concerns exist
-• Document that a reminder was issued
-${context ? `• Specific focus: "${context}"` : ""}`,
-      note: `Policy reminder issued to team.
-Tone: ${toneLabel}
-Topic: [Policy area]
-${context ? `Context: ${context}` : "General reminder."}
-Distribution: Team-wide communication.
-Follow-up: Individual discussions if warranted.`,
+      points: `• Keep the message general—don't single anyone out
+• Reference the policy clearly but not punitively
+• Frame as a helpful reminder
+• Offer to answer questions
+• Follow up individually if specific concerns exist`,
+      note: `Policy reminder issued to team re: [topic].
+Tone: ${toneLabel}. Distribution: Team-wide.${contextNote}
+Individual follow-up if warranted.`,
     },
     "check-in": {
       message: `Dear [Employee Name],
 
-I wanted to check in and see how you're doing. I've noticed [observation], and I want to make sure you know I'm here to support you.
+I wanted to check in and see how you're doing.${context ? ` ${context}` : " I've noticed some changes recently and"} want to make sure you know I'm here to support you.
 
-${context ? `${context} ` : ""}There's no pressure to share anything you're not comfortable with, but if there's anything affecting your work or wellbeing that you'd like to discuss, I'm happy to listen.
+There's no pressure to share anything you're not comfortable with. If there's anything affecting your work or wellbeing you'd like to discuss, I'm happy to listen.
 
-Would you have time for a brief, informal conversation this week? I'm available at your convenience.
+Would you have time for a brief conversation this week?
 
 Take care,
 [Manager Name]`,
-      points: `• Approach with genuine care and no hidden agenda
+      points: `• Approach with genuine care, no hidden agenda
 • Make clear the conversation is voluntary
-• Do not diagnose or assume what's happening
 • Listen more than you speak
-• Ask how you can help, rather than prescribing solutions
-• Share available resources (EAP, HR supports) without pressure
-• Respect their privacy if they choose not to share
-• Follow up as appropriate
-${context ? `• Observation: "${context}"` : ""}`,
+• Share available resources (EAP) without pressure
+• Respect their privacy if they decline`,
       note: `Wellness check-in initiated with [Employee Name].
-Tone: ${toneLabel}
-${context ? `Observation: ${context}` : "General wellness inquiry."}
-Approach: Supportive, non-intrusive.
-Resources mentioned: [EAP, other supports as appropriate]
-Follow-up: As agreed with employee.`,
+Tone: ${toneLabel}. Approach: Supportive, non-intrusive.${contextNote}
+Resources offered: [EAP/other]. Follow-up as agreed.`,
     },
     "probation-review": {
       message: `Dear [Employee Name],
 
-As you approach the end of your probationary period, I'd like to schedule a meeting to discuss your progress and review your performance over these initial months.
+As you approach the end of your probationary period, I'd like to schedule a meeting to discuss your progress.${context ? ` I'd particularly like to discuss ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `I'd particularly like to discuss ${context.toLowerCase().trim()}. ` : ""}This is an opportunity for us to reflect on your accomplishments, discuss any areas for growth, and talk about your future with the team.
+This is an opportunity to reflect on your accomplishments, discuss areas for growth, and talk about your future with the team.
 
-Please let me know your availability for a meeting this week. I look forward to our conversation.
+Please let me know your availability this week.
 
 Best regards,
 [Manager Name]`,
-      points: `• Prepare specific examples of both strengths and development areas
-• Be honest and clear about whether probation will be confirmed
-• Provide feedback that is actionable and forward-looking
+      points: `• Prepare specific examples of strengths and development areas
+• Be clear about whether probation will be confirmed
+• Provide actionable, forward-looking feedback
 • Allow the employee to share their perspective
-• Discuss goals and expectations for the continued role
-• Document the conversation and outcomes formally
-• If probation is not being confirmed, follow proper process and involve HR
-${context ? `• Address: "${context}"` : ""}`,
-      note: `Probationary review meeting for [Employee Name].
-Tone: ${toneLabel}
-Probation end date: [Date]
-${context ? `Key discussion points: ${context}` : "Standard review."}
-Outcome: [To be documented after meeting]
-Next steps: Formal documentation of probation decision.`,
+• Document the conversation formally`,
+      note: `Probationary review for [Employee Name].
+Tone: ${toneLabel}. Probation end date: [Date].${contextNote}
+Outcome to be documented. HR notified if probation not confirmed.`,
     },
     "termination": {
       message: `Dear [Employee Name],
 
-I am writing to confirm our conversation regarding the end of your employment with [Organization], effective [Date].
+I am writing to confirm our conversation regarding the end of your employment with [Organization], effective [Date].${context ? ` As discussed, ${context.toLowerCase().trim()}.` : ""}
 
-${context ? `As discussed, ${context.toLowerCase().trim()}. ` : ""}Please find attached information regarding your final pay, benefits continuation, and any other relevant matters.
+Please find attached information regarding your final pay, benefits continuation, and other relevant matters. For questions about logistics, please contact HR at [contact info].
 
-If you have questions about the logistics of your departure or require any documentation, please contact HR at [contact info].
-
-We appreciate your contributions during your time with us and wish you well in your future endeavours.
+We appreciate your contributions and wish you well in your future endeavours.
 
 Sincerely,
 [Manager Name]`,
-      points: `• Ensure HR is involved before any termination conversation
-• Be direct but compassionate—do not prolong uncertainty
-• Have documentation prepared: termination letter, ROE timeline, benefits info
-• Allow the employee to respond and ask questions
-• Explain logistics: final pay, return of property, references
-• Treat the person with dignity throughout
-• Do not discuss reasons beyond what is documented and approved
-• Follow all organizational and legal requirements
-${context ? `• Specific circumstances: "${context}"` : ""}`,
-      note: `Employment ending for [Employee Name].
-Tone: ${toneLabel}
-Effective date: [Date]
-${context ? `Context: ${context}` : "Reason documented separately."}
-HR involvement: Confirmed.
-Documentation provided: Termination letter, benefits information.
-Follow-up: Final pay processing, ROE issuance.`,
+      points: `• Ensure HR is involved before the conversation
+• Be direct but compassionate—don't prolong uncertainty
+• Have all documentation prepared
+• Allow the employee to ask questions
+• Treat the person with dignity throughout`,
+      note: `Employment ended for [Employee Name]. Effective: [Date].
+Tone: ${toneLabel}. HR involved: Yes.${contextNote}
+Documentation provided. Final pay and ROE to be processed.`,
     },
   };
 
