@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw } from "lucide-react";
+import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -546,6 +546,73 @@ const generateRiskCheck = (scenario: string, tone: string, context: string): { r
   };
 };
 
+type ConfidenceScore = {
+  score: number;
+  strengths: string[];
+  suggestion: string | null;
+};
+
+const generateConfidenceScore = (scenario: string, tone: string, riskLevel: RiskLevel): ConfidenceScore => {
+  // Base score starts at 7.0
+  let score = 7.0;
+  const strengths: string[] = [];
+  let suggestion: string | null = null;
+
+  // Tone bonuses
+  if (tone === "supportive" || tone === "compassionate") {
+    score += 1.0;
+    strengths.push("Empathetic and supportive tone");
+  } else if (tone === "collaborative") {
+    score += 0.8;
+    strengths.push("Collaborative approach builds trust");
+  } else if (tone === "neutral" || tone === "professional") {
+    score += 0.5;
+    strengths.push("Professional and balanced tone");
+  } else if (tone === "firm") {
+    score += 0.3;
+    strengths.push("Clear and direct communication");
+  }
+
+  // Scenario-based adjustments
+  const lowerRiskScenarios = ["check-in", "leave-request", "follow-up", "policy-reminder"];
+  const higherRiskScenarios = ["termination", "mental-health-disclosure", "accommodation-request"];
+  
+  if (lowerRiskScenarios.includes(scenario)) {
+    score += 0.5;
+    strengths.push("Straightforward scenario with clear approach");
+  } else if (higherRiskScenarios.includes(scenario)) {
+    score -= 0.3;
+    suggestion = "Consider having HR review before sending";
+  }
+
+  // Risk level adjustments
+  if (riskLevel === "Low") {
+    score += 0.5;
+    strengths.push("Low risk of misinterpretation");
+  } else if (riskLevel === "Moderate") {
+    if (!suggestion) suggestion = "Minor wording adjustments may help";
+  } else if (riskLevel === "High") {
+    score -= 0.5;
+    if (!suggestion) suggestion = "Review with HR before proceeding";
+  }
+
+  // Add default strengths if we don't have enough
+  if (strengths.length < 2) {
+    strengths.push("Clear intent and purpose");
+  }
+  if (strengths.length < 3) {
+    strengths.push("Respectful and professional language");
+  }
+
+  // Clamp score between 5.0 and 9.5
+  score = Math.max(5.0, Math.min(9.5, score));
+  
+  // Round to one decimal
+  score = Math.round(score * 10) / 10;
+
+  return { score, strengths: strengths.slice(0, 3), suggestion };
+};
+
 const generateSaferVersion = (originalMessage: string, scenario: string): string => {
   // Safer version templates that preserve intent, soften tone, remove assumptions, add empathy
   // Guardrail: Never imply discipline, termination, or legal compliance
@@ -672,6 +739,7 @@ export function DraftGenerator() {
     documentationNote: string;
     riskCheck: string;
     riskLevel: RiskLevel;
+    confidence: ConfidenceScore;
   } | null>(null);
 
   const handleGenerate = async () => {
@@ -685,7 +753,8 @@ export function DraftGenerator() {
 
     const result = generateDraft(scenarioType, tone, context);
     const { riskCheck, riskLevel } = generateRiskCheck(scenarioType, tone, context);
-    setOutput({ ...result, riskCheck, riskLevel });
+    const confidence = generateConfidenceScore(scenarioType, tone, riskLevel);
+    setOutput({ ...result, riskCheck, riskLevel, confidence });
     setIsGenerating(false);
   };
 
@@ -840,6 +909,56 @@ export function DraftGenerator() {
               </span>
             }
           />
+
+          {/* Manager Confidence Score */}
+          <div 
+            className="bg-card rounded-xl border border-border shadow-card p-5 opacity-0 animate-slide-up"
+            style={{ animationDelay: "500ms", animationFillMode: "forwards" }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
+                <ThumbsUp className="w-4 h-4" />
+              </div>
+              <h3 className="font-heading text-lg font-semibold text-foreground">Manager Confidence Score</h3>
+            </div>
+            
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`text-4xl font-bold ${
+                output.confidence.score >= 8 
+                  ? "text-green-600 dark:text-green-400" 
+                  : output.confidence.score >= 6.5
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-red-600 dark:text-red-400"
+              }`}>
+                {output.confidence.score.toFixed(1)}
+              </div>
+              <div className="text-muted-foreground text-sm">/ 10</div>
+              <div className={`ml-auto px-3 py-1 rounded-full text-xs font-medium ${
+                output.confidence.score >= 8 
+                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                  : output.confidence.score >= 6.5
+                  ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+              }`}>
+                {output.confidence.score >= 8 ? "Ready to send" : output.confidence.score >= 6.5 ? "Review recommended" : "Needs attention"}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {output.confidence.strengths.map((strength, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm text-foreground/80">
+                  <span className="text-green-500">✓</span>
+                  {strength}
+                </div>
+              ))}
+              {output.confidence.suggestion && (
+                <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400 mt-3 pt-3 border-t border-border">
+                  <span>→</span>
+                  {output.confidence.suggestion}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Generate Safer Version Button */}
           {!saferVersion && (
