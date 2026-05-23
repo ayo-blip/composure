@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -35,6 +35,29 @@ const FEATURES = [
     icon: Users,
     title: "Sector-Aware Guidance",
     description: "Tailored for private, public sector, and unionized environments — including collective agreement awareness.",
+  },
+  {
+    icon: Database,
+    title: "Organisation Knowledge Base",
+    description: "Upload your HR policies, handbooks, and collective agreements. Every draft is grounded in your organisation's own guidelines.",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    name: "Sarah M.",
+    role: "HR Manager, Healthcare",
+    quote: "CompoSure saved me hours every week. I used to agonise over wording for difficult conversations — now I have a professional draft in under a minute.",
+  },
+  {
+    name: "James T.",
+    role: "Operations Director, Manufacturing",
+    quote: "The risk assessment feature alone is worth it. It flagged language in my draft that could have caused a grievance. Invaluable for our unionized environment.",
+  },
+  {
+    name: "Priya K.",
+    role: "People & Culture Lead, Tech",
+    quote: "We uploaded our entire employee handbook and now every draft references our actual policies. It feels like having an HR advisor on call 24/7.",
   },
 ];
 
@@ -177,7 +200,30 @@ const Index = () => {
                 );
               })}
             </div>
-            <div className="text-center mt-8">
+            {/* Testimonials */}
+            <div className="mt-14">
+              <h3 className="font-heading text-2xl font-semibold text-foreground text-center mb-8">
+                Trusted by people leaders
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {TESTIMONIALS.map((t) => (
+                  <div key={t.name} className="bg-card border border-border rounded-2xl p-6 shadow-card flex flex-col gap-4">
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed flex-1">"{t.quote}"</p>
+                    <div>
+                      <p className="font-semibold text-sm text-foreground">{t.name}</p>
+                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-center mt-10">
               <Link to="/auth">
                 <Button variant="accent" size="lg" className="gap-2">
                   <Zap className="w-4 h-4" />
