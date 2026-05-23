@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -101,6 +101,14 @@ const Index = () => {
               <>
                 {user ? (
                   <>
+                    {user.email === 'leke365@gmail.com' && (
+                      <Link to="/superadmin">
+                        <Button variant="ghost" size="sm" className="gap-2 text-accent">
+                          <BarChart2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">Platform</span>
+                        </Button>
+                      </Link>
+                    )}
                     {profile?.role === 'admin' && (
                       <>
                         <Link to="/knowledge-base">
