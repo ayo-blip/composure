@@ -1,9 +1,42 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+
+const FEATURES = [
+  {
+    icon: MessageSquare,
+    title: "AI-Drafted Messages",
+    description: "Get a professionally worded message for any sensitive workplace situation — performance, attendance, mental health, and more.",
+  },
+  {
+    icon: ClipboardList,
+    title: "Key Talking Points",
+    description: "Know exactly what to say in the room. Get a structured list of points to guide your conversation confidently.",
+  },
+  {
+    icon: ShieldAlert,
+    title: "Risk Assessment",
+    description: "Every draft includes a risk rating — Low, Moderate, or High — so you know what to watch out for before you send.",
+  },
+  {
+    icon: ThumbsUp,
+    title: "AI Confidence Score",
+    description: "See how strong your draft is rated out of 10, with specific strengths and suggestions to improve it.",
+  },
+  {
+    icon: FileText,
+    title: "Documentation Note",
+    description: "A ready-to-use record of the conversation for your HR file — factual, professional, and legally mindful.",
+  },
+  {
+    icon: Users,
+    title: "Sector-Aware Guidance",
+    description: "Tailored for private, public sector, and unionized environments — including collective agreement awareness.",
+  },
+];
 
 const Index = () => {
   const { user, profile, planTier, signOut, loading } = useAuth();
@@ -122,6 +155,39 @@ const Index = () => {
             <span>No legal/medical opinions • No blame or judgment • Plain language</span>
           </div>
         </div>
+
+        {/* Feature Cards — shown to logged-out visitors only */}
+        {!loading && !user && (
+          <div className="max-w-4xl mx-auto mb-14">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {FEATURES.map((feature, i) => {
+                const Icon = feature.icon;
+                return (
+                  <div
+                    key={feature.title}
+                    className="bg-card border border-border rounded-2xl p-5 shadow-card animate-fade-in"
+                    style={{ animationDelay: `${i * 60}ms` }}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="font-heading font-semibold text-foreground mb-1">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="text-center mt-8">
+              <Link to="/auth">
+                <Button variant="accent" size="lg" className="gap-2">
+                  <Zap className="w-4 h-4" />
+                  Get started free — 10 drafts/month
+                </Button>
+              </Link>
+              <p className="text-xs text-muted-foreground mt-3">No credit card required</p>
+            </div>
+          </div>
+        )}
 
         {/* Generator */}
         <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>
