@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { getPlanLimits } from '@/lib/planLimits';
 import {
   FileEdit, ArrowLeft, Settings, Users, BarChart2,
-  Shield, CheckCircle, XCircle, Loader2, Save, UserPlus, Zap
+  Shield, CheckCircle, XCircle, Loader2, Save, UserPlus, Zap, Activity, FolderOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-type Tab = 'settings' | 'team' | 'usage';
+type Tab = 'settings' | 'team' | 'usage' | 'activity';
 
 interface OrgMember {
   id: string;
@@ -76,6 +76,12 @@ export default function AdminDashboard() {
   const [usage, setUsage] = useState<UsageStat | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(false);
 
+  // Activity state
+  const [recentDrafts, setRecentDrafts] = useState<any[]>([]);
+  const [memberStats, setMemberStats] = useState<any[]>([]);
+  const [caseCount, setCaseCount] = useState<number>(0);
+  const [loadingActivity, setLoadingActivity] = useState(false);
+
   const fetchOrg = useCallback(async () => {
     if (!profile?.organisation_id) return;
     const { data, error } = await supabase
@@ -138,9 +144,49 @@ export default function AdminDashboard() {
     setLoadingUsage(false);
   }, [profile?.organisation_id]);
 
+  const fetchActivity = useCallback(async () => {
+    if (!profile?.organisation_id) return;
+    setLoadingActivity(true);
+
+    const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+    const [draftsRes, usageRes, casesRes] = await Promise.all([
+      supabase
+        .from('saved_drafts')
+        .select('id, title, scenarios, risk_level, created_at, user_id, profiles(full_name)')
+        .order('created_at', { ascending: false })
+        .limit(25),
+      supabase
+        .from('usage_logs')
+        .select('user_id, profiles(full_name)')
+        .eq('organisation_id', profile.organisation_id)
+        .gte('created_at', monthStart),
+      supabase
+        .from('employee_cases')
+        .select('id', { count: 'exact', head: true })
+        .eq('organisation_id', profile.organisation_id)
+        .eq('status', 'active'),
+    ]);
+
+    setRecentDrafts(draftsRes.data || []);
+
+    // Aggregate usage per member
+    const counts: Record<string, { name: string; count: number }> = {};
+    for (const log of usageRes.data || []) {
+      const uid = log.user_id;
+      const name = (log.profiles as any)?.full_name ?? 'Unknown';
+      if (!counts[uid]) counts[uid] = { name, count: 0 };
+      counts[uid].count++;
+    }
+    setMemberStats(Object.values(counts).sort((a, b) => b.count - a.count));
+    setCaseCount(casesRes.count ?? 0);
+    setLoadingActivity(false);
+  }, [profile?.organisation_id]);
+
   useEffect(() => { fetchOrg(); }, [fetchOrg]);
   useEffect(() => { if (activeTab === 'team') fetchMembers(); }, [activeTab, fetchMembers]);
   useEffect(() => { if (activeTab === 'usage') fetchUsage(); }, [activeTab, fetchUsage]);
+  useEffect(() => { if (activeTab === 'activity') fetchActivity(); }, [activeTab, fetchActivity]);
 
   const saveSettings = async () => {
     if (!org) {
@@ -213,10 +259,29 @@ export default function AdminDashboard() {
     }
   };
 
+  const scenarioLabels: Record<string, string> = {
+    'performance-concern': 'Performance',
+    'attendance-issue': 'Attendance',
+    'accommodation-request': 'Accommodation',
+    'mental-health-disclosure': 'Mental Health',
+    'return-to-work': 'Return to Work',
+    'leave-request': 'Leave',
+    'conflict-resolution': 'Conflict',
+    'policy-reminder': 'Policy',
+    'check-in': 'Check-In',
+    'probation-review': 'Probation',
+    'termination': 'Termination',
+    'difficult-timing': 'Difficult Timing',
+    'follow-up': 'Follow-Up',
+    'declining-request': 'Declining',
+    'resetting-expectations': 'Expectations',
+  };
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
     { id: 'team', label: 'Team', icon: <Users className="w-4 h-4" /> },
     { id: 'usage', label: 'Usage', icon: <BarChart2 className="w-4 h-4" /> },
+    { id: 'activity', label: 'Team Activity', icon: <Activity className="w-4 h-4" /> },
   ];
 
   return (
@@ -599,6 +664,114 @@ export default function AdminDashboard() {
               })() : null}
             </div>
           )}
+          {/* Activity Tab */}
+          {activeTab === 'activity' && (
+            <div className="space-y-6">
+              {loadingActivity ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : (
+                <>
+                  {/* Summary cards */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+                      <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                        <Activity className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wide">Drafts This Month</span>
+                      </div>
+                      <p className="font-heading text-3xl font-bold text-foreground">
+                        {memberStats.reduce((s, m) => s + m.count, 0)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">across {memberStats.length} active {memberStats.length === 1 ? 'member' : 'members'}</p>
+                    </div>
+                    <div className="bg-card border border-border rounded-2xl p-5 shadow-card">
+                      <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                        <FolderOpen className="w-4 h-4" />
+                        <span className="text-xs font-medium uppercase tracking-wide">Open Cases</span>
+                      </div>
+                      <p className="font-heading text-3xl font-bold text-foreground">{caseCount}</p>
+                      <p className="text-xs text-muted-foreground mt-1">active employee situations</p>
+                    </div>
+                  </div>
+
+                  {/* Per-member activity */}
+                  {memberStats.length > 0 && (
+                    <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
+                      <div className="px-5 py-4 border-b border-border">
+                        <h3 className="font-heading font-semibold text-foreground">Member Activity — This Month</h3>
+                      </div>
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border bg-secondary/50">
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground">Member</th>
+                            <th className="text-right px-5 py-3 font-medium text-muted-foreground">Drafts</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {memberStats.map((m, i) => (
+                            <tr key={i} className={i < memberStats.length - 1 ? 'border-b border-border' : ''}>
+                              <td className="px-5 py-3 font-medium text-foreground">{m.name}</td>
+                              <td className="px-5 py-3 text-right text-muted-foreground">{m.count}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Recent drafts feed */}
+                  <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
+                    <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+                      <h3 className="font-heading font-semibold text-foreground">Recent Team Drafts</h3>
+                      <span className="text-xs text-muted-foreground">Metadata only — draft content is private</span>
+                    </div>
+                    {recentDrafts.length === 0 ? (
+                      <div className="text-center py-10 text-sm text-muted-foreground">No drafts yet.</div>
+                    ) : (
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-border bg-secondary/50">
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground">Title</th>
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden md:table-cell">Scenario</th>
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden sm:table-cell">Member</th>
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground">Risk</th>
+                            <th className="text-left px-5 py-3 font-medium text-muted-foreground hidden sm:table-cell">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recentDrafts.map((d, i) => (
+                            <tr key={d.id} className={i < recentDrafts.length - 1 ? 'border-b border-border' : ''}>
+                              <td className="px-5 py-3 text-foreground max-w-[160px] truncate">{d.title}</td>
+                              <td className="px-5 py-3 text-muted-foreground hidden md:table-cell">
+                                {scenarioLabels[d.scenarios?.[0]] ?? d.scenarios?.[0] ?? '—'}
+                              </td>
+                              <td className="px-5 py-3 text-muted-foreground hidden sm:table-cell">
+                                {(d.profiles as any)?.full_name ?? 'Unknown'}
+                              </td>
+                              <td className="px-5 py-3">
+                                <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                                  d.risk_level === 'High'
+                                    ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                                    : d.risk_level === 'Moderate'
+                                    ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                                    : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                }`}>{d.risk_level}</span>
+                              </td>
+                              <td className="px-5 py-3 text-muted-foreground hidden sm:table-cell">
+                                {new Date(d.created_at).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
         </div>
       </main>
     </div>
