@@ -250,7 +250,7 @@ export default function KnowledgeBase() {
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold text-foreground">
-              Compo<span className="text-accent">Sure</span>
+              HR<span className="text-accent">CompoSure</span>
             </h1>
             <p className="text-xs text-muted-foreground">Knowledge Base</p>
           </div>
@@ -264,7 +264,7 @@ export default function KnowledgeBase() {
               Knowledge Base
             </h2>
             <p className="text-muted-foreground">
-              Upload your HR policies, procedures, handbooks, and collective agreements. CompoSure will use them to ground every response in your organisation's own guidelines. For unionized environments, upload your applicable collective agreement as a PDF so the AI can reference it when drafting.
+              Upload your HR policies, procedures, handbooks, and collective agreements. HRCompoSure will use them to ground every response in your organisation's own guidelines. For unionized environments, upload your applicable collective agreement as a PDF so the AI can reference it when drafting.
             </p>
           </div>
 

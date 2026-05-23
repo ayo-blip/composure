@@ -42,7 +42,7 @@ const TESTIMONIALS = [
   {
     name: "Sarah M.",
     role: "HR Manager, Healthcare",
-    quote: "CompoSure saved me hours every week. I used to agonise over wording for difficult conversations — now I have a professional draft in under a minute.",
+    quote: "HRCompoSure saved me hours every week. I used to agonise over wording for difficult conversations — now I have a professional draft in under a minute.",
   },
   {
     name: "James T.",
@@ -60,6 +60,8 @@ const Index = () => {
   const { user, profile, planTier, signOut, loading } = useAuth();
   const { isDark, toggle: toggleTheme } = useTheme();
 
+  const firstName = profile?.full_name?.split(' ')[0] ?? null;
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -70,7 +72,7 @@ const Index = () => {
               <FileEdit className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="font-heading text-xl font-semibold text-foreground">Compo<span className="text-accent">Sure</span></h1>
+              <h1 className="font-heading text-xl font-semibold text-foreground">HR<span className="text-accent">CompoSure</span></h1>
               <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
             </div>
           </div>
@@ -157,6 +159,13 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8 md:py-12">
+          {/* Welcome greeting */}
+          {user && firstName && (
+            <p className="text-sm text-muted-foreground mb-6 animate-fade-in">
+              Welcome back, <span className="font-semibold text-foreground">{firstName}</span>
+            </p>
+          )}
+
           {/* Hero */}
           <div className="text-center mb-10 md:mb-14">
             <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4 animate-fade-in">
@@ -208,7 +217,7 @@ const Index = () => {
               <div className="mt-20">
                 <div className="text-center mb-10">
                   <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">Trusted by people leaders</h3>
-                  <p className="text-muted-foreground text-sm">Managers and HR teams using CompoSure every week.</p>
+                  <p className="text-muted-foreground text-sm">Managers and HR teams using HRCompoSure every week.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {TESTIMONIALS.map((t) => (
@@ -246,10 +255,15 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="border-t border-border py-6 mt-auto">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-center space-y-2">
           <p className="text-sm text-muted-foreground">
             For guidance only. Always consult HR and legal advisors for specific situations.
           </p>
+          <div className="flex items-center justify-center gap-4">
+            <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>
+          </div>
         </div>
       </footer>
     </div>

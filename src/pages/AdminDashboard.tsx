@@ -353,7 +353,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold text-foreground">
-              Compo<span className="text-accent">Sure</span>
+              HR<span className="text-accent">CompoSure</span>
             </h1>
             <p className="text-xs text-muted-foreground">Admin Dashboard</p>
           </div>

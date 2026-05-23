@@ -78,6 +78,26 @@ serve(async (req) => {
       });
     }
 
+    // Enforce 50 user messages per user per calendar month
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+
+    const { count } = await supabase
+      .from('chat_messages')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user_id)
+      .eq('role', 'user')
+      .gte('created_at', monthStart.toISOString());
+
+    if ((count ?? 0) >= 50) {
+      return new Response(JSON.stringify({
+        error: "You've reached your 50 message limit for this month. Your allowance resets on the 1st.",
+      }), {
+        status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     // Fetch last 10 messages for conversation history
     const { data: history } = await supabase
       .from('chat_messages')
@@ -105,7 +125,7 @@ serve(async (req) => {
 
     const jurisdictionLabel = JURISDICTION_LABELS[org?.jurisdiction ?? 'other'] ?? 'the applicable jurisdiction';
 
-    const systemPrompt = `You are an expert HR advisor integrated into CompoSure, a workplace communications platform used by people leaders and HR professionals.
+    const systemPrompt = `You are an expert HR advisor integrated into HRCompoSure, a workplace communications platform used by people leaders and HR professionals.
 
 Jurisdiction: ${jurisdictionLabel}. Apply employment law principles relevant to this jurisdiction.
 

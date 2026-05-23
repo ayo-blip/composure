@@ -10,6 +10,7 @@ const PLANS = [
     price: 'Free',
     priceId: null,
     description: 'For individuals getting started',
+    badge: 'Limited offer — available for a limited time only',
     features: [
       '10 AI drafts per month',
       'Up to 3 team members',
@@ -24,9 +25,10 @@ const PLANS = [
     price: '$49',
     priceId: 'price_1Ta6YQLmjsM9yprvYjQQ2G2g',
     description: 'For growing HR teams',
+    badge: null,
     features: [
       '150 AI drafts per month',
-      'Up to 15 team members',
+      'Up to 10 team members',
       'Knowledge base (policies upload)',
       'Draft library',
       'Jurisdiction-aware guidance',
@@ -40,12 +42,15 @@ const PLANS = [
     price: '$149',
     priceId: 'price_1Ta6Z7LmjsM9yprvDV51z9eX',
     description: 'For larger organisations',
+    badge: null,
     features: [
       'Unlimited AI drafts',
-      'Unlimited team members',
+      'Up to 30 team members',
       'Knowledge base (policies upload)',
       'Draft library',
       'Jurisdiction-aware guidance',
+      'HR Assistant (AI chat)',
+      'Admin broadcast announcements',
       'Priority support',
       'Dedicated onboarding',
     ],
@@ -108,7 +113,7 @@ export default function Pricing() {
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold text-foreground">
-              Compo<span className="text-accent">Sure</span>
+              HR<span className="text-accent">CompoSure</span>
             </h1>
           </div>
         </div>
@@ -142,7 +147,12 @@ export default function Pricing() {
 
               <div className="mb-6">
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-1">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{plan.description}</p>
+                <p className="text-sm text-muted-foreground mb-2">{plan.description}</p>
+                {plan.badge && (
+                  <p className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-2.5 py-1.5 mb-3">
+                    ⚠ {plan.badge}
+                  </p>
+                )}
                 <div className="flex items-baseline gap-1">
                   <span className="font-heading text-4xl font-bold text-foreground">{plan.price}</span>
                   {plan.priceId && <span className="text-muted-foreground text-sm">/month</span>}
@@ -180,6 +190,20 @@ export default function Pricing() {
         <p className="text-center text-sm text-muted-foreground mt-10">
           No credit card required for Starter. Cancel anytime.
         </p>
+
+        {/* Custom plan CTA */}
+        <div className="mt-10 max-w-2xl mx-auto bg-card border border-border rounded-2xl p-8 text-center shadow-card">
+          <h3 className="font-heading text-lg font-semibold text-foreground mb-2">Need something larger?</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            If your organisation needs more than 30 users, a higher message allowance, or a tailored setup — we offer custom plans. Get in touch and we'll work something out.
+          </p>
+          <a
+            href="mailto:hello@hrcomposure.com?subject=Custom Plan Enquiry"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            Contact us about a custom plan
+          </a>
+        </div>
       </main>
     </div>
   );

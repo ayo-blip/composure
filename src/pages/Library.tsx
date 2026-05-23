@@ -249,7 +249,7 @@ export default function Library() {
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold text-foreground">
-              Compo<span className="text-accent">Sure</span>
+              HR<span className="text-accent">CompoSure</span>
             </h1>
             <p className="text-xs text-muted-foreground">Your saved drafts</p>
           </div>

@@ -16,6 +16,8 @@ import Pricing from "./pages/Pricing";
 import BillingSuccess from "./pages/BillingSuccess";
 import Cases from "./pages/Cases";
 import CaseDetail from "./pages/CaseDetail";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +80,8 @@ const App = () => (
             <Route path="/billing/success" element={<BillingSuccess />} />
             <Route path="/cases" element={<OrgGuard><Cases /></OrgGuard>} />
             <Route path="/cases/:id" element={<OrgGuard><CaseDetail /></OrgGuard>} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

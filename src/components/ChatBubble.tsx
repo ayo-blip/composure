@@ -141,7 +141,7 @@ export function ChatBubble() {
         organisation_id: profile.organisation_id,
         endpoint: json.endpoint!,
         p256dh: (json.keys as any)?.p256dh ?? "",
-        auth_key: (json.keys as any)?.auth ?? "",
+        auth: (json.keys as any)?.auth ?? "",
       }, { onConflict: "user_id,endpoint" });
     } catch {
       // Push subscription failed silently — notification permission still granted

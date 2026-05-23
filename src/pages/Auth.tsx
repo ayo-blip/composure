@@ -91,7 +91,7 @@ export default function Auth() {
         } else {
           toast({
             title: "Account created!",
-            description: "Welcome to CompoSure. You're now signed in.",
+            description: "Welcome to HRCompoSure. You're now signed in.",
           });
           navigate("/");
         }
@@ -123,7 +123,7 @@ export default function Auth() {
           </div>
           <div>
             <h1 className="font-heading text-xl font-semibold text-foreground">
-              Compo<span className="text-accent">Sure</span>
+              HR<span className="text-accent">CompoSure</span>
             </h1>
             <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
           </div>
