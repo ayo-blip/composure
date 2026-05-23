@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users, Star, FolderOpen } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -35,6 +35,16 @@ const FEATURES = [
     icon: ClipboardList,
     title: "Talking Points for the Room",
     description: "Walk into every conversation prepared. Get a structured list of points that keep things on track and professional.",
+  },
+  {
+    icon: BotMessageSquare,
+    title: "HR Assistant (Enterprise)",
+    description: "Ask HR questions anytime — jurisdiction-aware, policy-grounded answers powered by AI and your own uploaded guidelines.",
+  },
+  {
+    icon: Megaphone,
+    title: "Admin Broadcast Notifications",
+    description: "Push important HR announcements to your whole team instantly — delivered in-app, by email, and as a desktop notification.",
   },
 ];
 
