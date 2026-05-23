@@ -72,25 +72,39 @@ export function DraftGenerator() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, profile } = useAuth();
-  const SESSION_KEY = 'composure_last_draft';
+  const STORAGE_KEY = 'composure_draft_v1';
+  const EXPIRY_MS = 24 * 60 * 60 * 1000;
 
-  const loadSession = () => {
+  const loadDraft = () => {
     try {
-      const saved = sessionStorage.getItem(SESSION_KEY);
-      return saved ? JSON.parse(saved) : null;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (Date.now() - (data.savedAt ?? 0) > EXPIRY_MS) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return data;
     } catch { return null; }
   };
 
-  const session = loadSession();
+  const saveDraft = (patch: object) => {
+    try {
+      const existing = loadDraft() ?? {};
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...existing, ...patch, savedAt: Date.now() }));
+    } catch {}
+  };
 
-  const [selectedScenarios, setSelectedScenarios] = useState<string[]>(session?.selectedScenarios ?? []);
-  const [tone, setTone] = useState(session?.tone ?? "");
-  const [sector, setSector] = useState<Sector>(session?.sector ?? "private");
-  const [context, setContext] = useState(session?.context ?? "");
+  const saved = loadDraft();
+
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>(saved?.selectedScenarios ?? []);
+  const [tone, setTone] = useState(saved?.tone ?? "");
+  const [sector, setSector] = useState<Sector>(saved?.sector ?? "private");
+  const [context, setContext] = useState(saved?.context ?? "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingSafer, setIsGeneratingSafer] = useState(false);
   const [saferVersion, setSaferVersion] = useState<string | null>(null);
-  const [policiesUsed, setPoliciesUsed] = useState<boolean | null>(null);
+  const [policiesUsed, setPoliciesUsed] = useState<boolean | null>(saved?.policiesUsed ?? null);
   const [output, setOutput] = useState<{
     draftMessage: string;
     talkingPoints: string;
@@ -98,7 +112,7 @@ export function DraftGenerator() {
     riskCheck: string;
     riskLevel: RiskLevel;
     confidence: ConfidenceScore;
-  } | null>(session?.output ?? null);
+  } | null>(saved?.output ?? null);
 
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -120,10 +134,8 @@ export function DraftGenerator() {
 
   useEffect(() => {
     if (!output) return;
-    try {
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ output, selectedScenarios, tone, sector, context }));
-    } catch {}
-  }, [output]);
+    saveDraft({ output, selectedScenarios, tone, sector, context, policiesUsed });
+  }, [output, policiesUsed]);
 
   useEffect(() => {
     if (!profile?.organisation_id) return;
@@ -183,7 +195,7 @@ export function DraftGenerator() {
     setCopiedDraft(false);
     setIsPreview(false);
     setLimitReached(false);
-    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
 
     try {
       const response = await fetch(
