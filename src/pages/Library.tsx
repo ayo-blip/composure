@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter, BookOpen } from "lucide-react";
+import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter, BookOpen, ChevronRight, MessageSquare, ClipboardList, FileText, ShieldAlert, ThumbsUp, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -72,6 +72,7 @@ export default function Library() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterFavorites, setFilterFavorites] = useState<string>("all");
+  const [selectedDraft, setSelectedDraft] = useState<SavedDraft | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -268,57 +269,40 @@ export default function Library() {
                   className="bg-card rounded-xl border border-border shadow-card p-5 hover:border-muted-foreground/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
-                    <div className="flex-1 min-w-0">
+                    {/* Clickable content area */}
+                    <button
+                      className="flex-1 min-w-0 text-left"
+                      onClick={() => setSelectedDraft(draft)}
+                    >
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-heading font-semibold text-foreground truncate">
-                          {draft.title}
-                        </h3>
-                        {draft.is_favorite && (
-                          <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />
-                        )}
+                        <h3 className="font-heading font-semibold text-foreground truncate">{draft.title}</h3>
+                        {draft.is_favorite && <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
                       </div>
                       <div className="flex flex-wrap gap-2 mb-2">
                         {draft.scenarios.map((scenario) => (
-                          <span
-                            key={scenario}
-                            className="text-xs px-2 py-1 rounded-full bg-secondary text-muted-foreground"
-                          >
+                          <span key={scenario} className="text-xs px-2 py-1 rounded-full bg-secondary text-muted-foreground">
                             {scenarioLabels[scenario] || scenario}
                           </span>
                         ))}
-                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">
-                          {draft.tone}
-                        </span>
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">{draft.tone}</span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <Calendar className="w-3 h-3" />
                         {new Date(draft.created_at).toLocaleDateString()}
                         <span className={`px-1.5 py-0.5 rounded text-xs ${
-                          draft.risk_level === "High" 
-                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400" 
+                          draft.risk_level === "High"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                             : draft.risk_level === "Moderate"
                             ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
                             : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        }`}>
-                          {draft.risk_level} risk
-                        </span>
+                        }`}>{draft.risk_level} risk</span>
                       </div>
-                    </div>
+                    </button>
                     <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => toggleFavorite(draft)}
-                        className="h-8 w-8"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => toggleFavorite(draft)} className="h-8 w-8">
                         <Star className={`w-4 h-4 ${draft.is_favorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => copyDraft(draft)}
-                        className="h-8 w-8"
-                      >
+                      <Button variant="ghost" size="icon" onClick={() => copyDraft(draft)} className="h-8 w-8">
                         <Copy className="w-4 h-4 text-muted-foreground" />
                       </Button>
                       <AlertDialog>
@@ -336,20 +320,109 @@ export default function Library() {
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => deleteDraft(draft.id)}>
-                              Delete
-                            </AlertDialogAction>
+                            <AlertDialogAction onClick={() => deleteDraft(draft.id)}>Delete</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedDraft(draft)} className="h-8 w-8">
+                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </Button>
                     </div>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2 cursor-pointer" onClick={() => setSelectedDraft(draft)}>
                     {draft.draft_message.substring(0, 200)}...
                   </p>
                 </div>
               ))}
             </div>
+
+            {/* Full Draft Modal */}
+            {selectedDraft && (
+              <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+                <div className="bg-card border border-border rounded-2xl shadow-lg w-full max-w-2xl my-8">
+                  {/* Modal Header */}
+                  <div className="flex items-start justify-between gap-4 p-6 border-b border-border">
+                    <div className="flex-1 min-w-0">
+                      <h2 className="font-heading text-xl font-semibold text-foreground mb-2">{selectedDraft.title}</h2>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedDraft.scenarios.map(s => (
+                          <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                            {scenarioLabels[s] || s}
+                          </span>
+                        ))}
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">{selectedDraft.tone}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                          selectedDraft.risk_level === "High"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                            : selectedDraft.risk_level === "Moderate"
+                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        }`}>{selectedDraft.risk_level} risk</span>
+                      </div>
+                    </div>
+                    <button onClick={() => setSelectedDraft(null)} className="p-2 hover:bg-secondary rounded-lg transition-colors shrink-0">
+                      <X className="w-5 h-5 text-muted-foreground" />
+                    </button>
+                  </div>
+
+                  {/* Modal Body */}
+                  <div className="p-6 space-y-6">
+                    {[
+                      { icon: <MessageSquare className="w-4 h-4" />, title: "Draft Message", content: selectedDraft.draft_message },
+                      { icon: <ClipboardList className="w-4 h-4" />, title: "Key Talking Points", content: selectedDraft.talking_points },
+                      { icon: <FileText className="w-4 h-4" />, title: "Documentation Note", content: selectedDraft.documentation_note },
+                      { icon: <ShieldAlert className="w-4 h-4" />, title: "Risk Assessment", content: selectedDraft.risk_check },
+                    ].map(section => (
+                      <div key={section.title}>
+                        <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                          {section.icon}
+                          <span className="text-xs font-semibold uppercase tracking-wide">{section.title}</span>
+                        </div>
+                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-secondary/50 rounded-xl p-4">
+                          {section.content}
+                        </p>
+                      </div>
+                    ))}
+
+                    {/* Confidence Score */}
+                    <div>
+                      <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                        <ThumbsUp className="w-4 h-4" />
+                        <span className="text-xs font-semibold uppercase tracking-wide">Confidence Score</span>
+                      </div>
+                      <div className="bg-secondary/50 rounded-xl p-4">
+                        <div className="flex items-center gap-3 mb-3">
+                          <span className={`text-3xl font-bold ${
+                            selectedDraft.confidence_score >= 8 ? "text-green-600 dark:text-green-400"
+                            : selectedDraft.confidence_score >= 6.5 ? "text-amber-600 dark:text-amber-400"
+                            : "text-red-600 dark:text-red-400"
+                          }`}>{selectedDraft.confidence_score.toFixed(1)}</span>
+                          <span className="text-muted-foreground text-sm">/ 10</span>
+                        </div>
+                        {selectedDraft.confidence_strengths?.map((s, i) => (
+                          <p key={i} className="text-sm text-foreground/80 flex items-center gap-2 mb-1">
+                            <span className="text-green-500">✓</span>{s}
+                          </p>
+                        ))}
+                        {selectedDraft.confidence_suggestion && (
+                          <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 pt-2 border-t border-border">
+                            → {selectedDraft.confidence_suggestion}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="flex gap-3 p-6 border-t border-border">
+                    <Button variant="default" className="gap-2 flex-1" onClick={() => copyDraft(selectedDraft)}>
+                      <Copy className="w-4 h-4" />Copy Draft
+                    </Button>
+                    <Button variant="outline" onClick={() => setSelectedDraft(null)}>Close</Button>
+                  </div>
+                </div>
+              </div>
+            )}
           )}
         </div>
       </main>

@@ -72,10 +72,21 @@ export function DraftGenerator() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user, profile } = useAuth();
-  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
-  const [tone, setTone] = useState("");
-  const [sector, setSector] = useState<Sector>("private");
-  const [context, setContext] = useState("");
+  const SESSION_KEY = 'composure_last_draft';
+
+  const loadSession = () => {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      return saved ? JSON.parse(saved) : null;
+    } catch { return null; }
+  };
+
+  const session = loadSession();
+
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>(session?.selectedScenarios ?? []);
+  const [tone, setTone] = useState(session?.tone ?? "");
+  const [sector, setSector] = useState<Sector>(session?.sector ?? "private");
+  const [context, setContext] = useState(session?.context ?? "");
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingSafer, setIsGeneratingSafer] = useState(false);
   const [saferVersion, setSaferVersion] = useState<string | null>(null);
@@ -87,7 +98,7 @@ export function DraftGenerator() {
     riskCheck: string;
     riskLevel: RiskLevel;
     confidence: ConfidenceScore;
-  } | null>(null);
+  } | null>(session?.output ?? null);
 
   // Save dialog state
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -106,6 +117,13 @@ export function DraftGenerator() {
     'Reviewing for compliance...',
     'Finalising your draft...',
   ];
+
+  useEffect(() => {
+    if (!output) return;
+    try {
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ output, selectedScenarios, tone, sector, context }));
+    } catch {}
+  }, [output]);
 
   useEffect(() => {
     if (!profile?.organisation_id) return;
@@ -165,6 +183,7 @@ export function DraftGenerator() {
     setCopiedDraft(false);
     setIsPreview(false);
     setLimitReached(false);
+    try { sessionStorage.removeItem(SESSION_KEY); } catch {}
 
     try {
       const response = await fetch(
