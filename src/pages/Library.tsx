@@ -262,6 +262,7 @@ export default function Library() {
               )}
             </div>
           ) : (
+            <>
             <div className="space-y-4">
               {filteredDrafts.map((draft) => (
                 <div
@@ -423,6 +424,7 @@ export default function Library() {
                 </div>
               </div>
             )}
+            </>
           )}
         </div>
       </main>
