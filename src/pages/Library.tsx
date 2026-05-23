@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter, BookOpen, ChevronRight, MessageSquare, ClipboardList, FileText, ShieldAlert, ThumbsUp, X } from "lucide-react";
+import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter, BookOpen, ChevronRight, MessageSquare, ClipboardList, FileText, ShieldAlert, ThumbsUp, X, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -24,6 +24,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SavedDraft {
   id: string;
@@ -43,6 +51,8 @@ interface SavedDraft {
   is_favorite: boolean;
   created_at: string;
   updated_at: string;
+  case_id: string | null;
+  employee_cases: { employee_name: string } | null;
 }
 
 const scenarioLabels: Record<string, string> = {
@@ -66,13 +76,16 @@ const scenarioLabels: Record<string, string> = {
 export default function Library() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
   
   const [drafts, setDrafts] = useState<SavedDraft[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterFavorites, setFilterFavorites] = useState<string>("all");
   const [selectedDraft, setSelectedDraft] = useState<SavedDraft | null>(null);
+  const [linkDialog, setLinkDialog] = useState<{ draftId: string } | null>(null);
+  const [linkName, setLinkName] = useState("");
+  const [isLinking, setIsLinking] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -90,7 +103,7 @@ export default function Library() {
     setIsLoading(true);
     const { data, error } = await supabase
       .from("saved_drafts")
-      .select("*")
+      .select("*, employee_cases(employee_name)")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -151,6 +164,52 @@ export default function Library() {
       title: "Copied!",
       description: "Draft message copied to clipboard.",
     });
+  };
+
+  const handleLinkEmployee = async () => {
+    if (!linkDialog || !linkName.trim() || !profile?.organisation_id || !user) return;
+    setIsLinking(true);
+    try {
+      const { data: existing } = await supabase
+        .from('employee_cases')
+        .select('id')
+        .eq('organisation_id', profile.organisation_id)
+        .ilike('employee_name', linkName.trim())
+        .maybeSingle();
+
+      let caseId = existing?.id;
+      if (!caseId) {
+        const { data: created } = await supabase
+          .from('employee_cases')
+          .insert({ organisation_id: profile.organisation_id, created_by: user.id, employee_name: linkName.trim() })
+          .select('id')
+          .single();
+        caseId = created?.id;
+      }
+
+      if (!caseId) return;
+
+      const { error } = await supabase
+        .from('saved_drafts')
+        .update({ case_id: caseId })
+        .eq('id', linkDialog.draftId);
+
+      if (!error) {
+        await supabase.from('employee_cases').update({ updated_at: new Date().toISOString() }).eq('id', caseId);
+        const name = linkName.trim();
+        setDrafts(prev => prev.map(d =>
+          d.id === linkDialog.draftId ? { ...d, case_id: caseId, employee_cases: { employee_name: name } } : d
+        ));
+        if (selectedDraft?.id === linkDialog.draftId) {
+          setSelectedDraft(prev => prev ? { ...prev, case_id: caseId, employee_cases: { employee_name: name } } : null);
+        }
+        toast({ title: `Linked to ${name}'s file` });
+        setLinkDialog(null);
+        setLinkName('');
+      }
+    } finally {
+      setIsLinking(false);
+    }
   };
 
   const filteredDrafts = drafts.filter(draft => {
@@ -333,6 +392,22 @@ export default function Library() {
                   <p className="text-sm text-muted-foreground line-clamp-2 cursor-pointer" onClick={() => setSelectedDraft(draft)}>
                     {draft.draft_message.substring(0, 200)}...
                   </p>
+                  <div className="mt-3 pt-3 border-t border-border">
+                    {draft.employee_cases ? (
+                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <UserRound className="w-3 h-3" />
+                        <span>{draft.employee_cases.employee_name}</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setLinkDialog({ draftId: draft.id }); setLinkName(''); }}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        <UserRound className="w-3 h-3" />
+                        Add to employee file
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -415,11 +490,29 @@ export default function Library() {
                   </div>
 
                   {/* Modal Footer */}
-                  <div className="flex gap-3 p-6 border-t border-border">
-                    <Button variant="default" className="gap-2 flex-1" onClick={() => copyDraft(selectedDraft)}>
-                      <Copy className="w-4 h-4" />Copy Draft
-                    </Button>
-                    <Button variant="outline" onClick={() => setSelectedDraft(null)}>Close</Button>
+                  <div className="p-6 border-t border-border space-y-3">
+                    <div>
+                      {selectedDraft.employee_cases ? (
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <UserRound className="w-3 h-3" />
+                          <span>Filed under <strong>{selectedDraft.employee_cases.employee_name}</strong></span>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => { setLinkDialog({ draftId: selectedDraft.id }); setLinkName(''); }}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <UserRound className="w-3 h-3" />
+                          Add to employee file
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex gap-3">
+                      <Button variant="default" className="gap-2 flex-1" onClick={() => copyDraft(selectedDraft)}>
+                        <Copy className="w-4 h-4" />Copy Draft
+                      </Button>
+                      <Button variant="outline" onClick={() => setSelectedDraft(null)}>Close</Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -428,6 +521,31 @@ export default function Library() {
           )}
         </div>
       </main>
+
+      {/* Link to employee file dialog */}
+      <Dialog open={!!linkDialog} onOpenChange={(open) => { if (!open) { setLinkDialog(null); setLinkName(''); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add to employee file</DialogTitle>
+            <DialogDescription>
+              Type the employee's name. If a file already exists for them, the draft will be added to it automatically.
+            </DialogDescription>
+          </DialogHeader>
+          <Input
+            value={linkName}
+            onChange={(e) => setLinkName(e.target.value)}
+            placeholder="e.g., J. Smith"
+            autoFocus
+            onKeyDown={(e) => e.key === 'Enter' && handleLinkEmployee()}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setLinkDialog(null); setLinkName(''); }}>Cancel</Button>
+            <Button variant="accent" onClick={handleLinkEmployee} disabled={!linkName.trim() || isLinking}>
+              {isLinking ? 'Saving...' : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
