@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users, Star } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, ThumbsUp, FileText, ClipboardList, Users, Star, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -17,14 +17,14 @@ const FEATURES = [
     description: "Every draft comes with a plain-language risk rating so you know what to watch out for before the conversation happens.",
   },
   {
+    icon: FolderOpen,
+    title: "Employee Case Timeline",
+    description: "Link every draft to an employee case and build a documented record over time — organised, audit-ready, and defensible.",
+  },
+  {
     icon: Database,
     title: "Your Policies, Built In",
     description: "Upload your HR handbook, policies, and collective agreements. Every draft is grounded in your organisation's own guidelines — not generic advice.",
-  },
-  {
-    icon: ClipboardList,
-    title: "Talking Points for the Room",
-    description: "Walk into every conversation prepared. Get a structured list of points that keep things on track and professional.",
   },
   {
     icon: FileText,
@@ -32,9 +32,9 @@ const FEATURES = [
     description: "A factual, professionally worded record of the conversation — ready to go straight into your HR file.",
   },
   {
-    icon: ThumbsUp,
-    title: "Confidence Score",
-    description: "See how strong your draft is rated out of 10, with specific strengths highlighted and suggestions for improvement.",
+    icon: ClipboardList,
+    title: "Talking Points for the Room",
+    description: "Walk into every conversation prepared. Get a structured list of points that keep things on track and professional.",
   },
 ];
 
@@ -105,6 +105,12 @@ const Index = () => {
                         </Link>
                       </>
                     )}
+                    <Link to="/cases">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <FolderOpen className="w-4 h-4" />
+                        <span className="hidden sm:inline">Cases</span>
+                      </Button>
+                    </Link>
                     <Link to="/library">
                       <Button variant="ghost" size="sm" className="gap-2">
                         <BookOpen className="w-4 h-4" />
@@ -160,12 +166,12 @@ const Index = () => {
           {/* Hero */}
           <div className="text-center mb-10 md:mb-14">
             <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4 animate-fade-in">
-              Professional Workplace Communications,
+              Every Difficult Conversation,
               <br />
-              <span className="text-accent">Crafted with Care</span>
+              <span className="text-accent">Handled Right — and Documented</span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto animate-fade-in mb-6" style={{ animationDelay: "100ms" }}>
-              Generate thoughtful, professional messages for sensitive workplace conversations. Built for managers and people leaders.
+              Draft professional workplace communications, assess risk, and build a defensible paper trail for every employee situation. Built for managers and people leaders.
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "150ms" }}>
               <Shield className="w-4 h-4" />

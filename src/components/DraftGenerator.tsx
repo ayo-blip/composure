@@ -93,6 +93,8 @@ export function DraftGenerator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [cases, setCases] = useState<{ id: string; employee_name: string; department: string | null }[]>([]);
+  const [selectedCaseId, setSelectedCaseId] = useState<string>('none');
   const [usageCount, setUsageCount] = useState<number | null>(null);
   const [limitReached, setLimitReached] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
@@ -328,7 +330,7 @@ export function DraftGenerator() {
     await handleGenerate();
   };
 
-  const handleOpenSaveDialog = () => {
+  const handleOpenSaveDialog = async () => {
     if (!user) {
       toast({
         title: "Sign in required",
@@ -339,6 +341,14 @@ export function DraftGenerator() {
     }
     const primaryScenario = scenarioTypes.find(s => s.value === selectedScenarios[0]);
     setSaveTitle(primaryScenario?.label || "Draft");
+    setSelectedCaseId('none');
+    // Fetch active cases for linking
+    const { data } = await supabase
+      .from('employee_cases')
+      .select('id, employee_name, department')
+      .eq('status', 'active')
+      .order('updated_at', { ascending: false });
+    setCases(data || []);
     setShowSaveDialog(true);
   };
 
@@ -363,7 +373,15 @@ export function DraftGenerator() {
         confidence_score: output.confidence.score,
         confidence_strengths: output.confidence.strengths,
         confidence_suggestion: output.confidence.suggestion,
+        case_id: selectedCaseId !== 'none' ? selectedCaseId : null,
       });
+      // Update case updated_at so it surfaces at the top of the list
+      if (selectedCaseId !== 'none') {
+        await supabase
+          .from('employee_cases')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', selectedCaseId);
+      }
 
       if (error) throw error;
 
@@ -838,17 +856,36 @@ export function DraftGenerator() {
               Give this draft a name so you can find it later.
             </DialogDescription>
           </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="save-title" className="text-sm font-medium">
-              Draft Title
-            </Label>
-            <Input
-              id="save-title"
-              value={saveTitle}
-              onChange={(e) => setSaveTitle(e.target.value)}
-              placeholder="e.g., Performance review discussion"
-              className="mt-2"
-            />
+          <div className="py-4 space-y-4">
+            <div>
+              <Label htmlFor="save-title" className="text-sm font-medium">Draft Title</Label>
+              <Input
+                id="save-title"
+                value={saveTitle}
+                onChange={(e) => setSaveTitle(e.target.value)}
+                placeholder="e.g., Performance review discussion"
+                className="mt-2"
+              />
+            </div>
+            {cases.length > 0 && (
+              <div>
+                <Label className="text-sm font-medium">
+                  Link to employee case <span className="text-muted-foreground font-normal">(optional)</span>
+                </Label>
+                <select
+                  value={selectedCaseId}
+                  onChange={e => setSelectedCaseId(e.target.value)}
+                  className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="none">No case</option>
+                  {cases.map(c => (
+                    <option key={c.id} value={c.id}>
+                      {c.employee_name}{c.department ? ` — ${c.department}` : ''}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
