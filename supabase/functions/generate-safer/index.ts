@@ -12,10 +12,10 @@ serve(async (req) => {
 
   try {
     const { originalMessage, scenario } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY is not configured');
     }
 
     const systemPrompt = `You are an expert HR communications specialist. Your task is to take a workplace message and create a "safer" version that is:
@@ -33,46 +33,38 @@ ${originalMessage}
 
 Return ONLY the rewritten message, nothing else. Keep placeholders like [Employee Name] intact.`;
 
-    console.log('Calling Lovable AI for safer version...');
-    
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2048,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('AI gateway error:', response.status, errorText);
-      
+      console.error('Anthropic API error:', response.status, errorText);
+
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: 'Rate limit exceeded. Please try again in a moment.' }), {
+        return new Response(JSON.stringify({ error: 'Rate limit reached. Please wait a moment and try again.' }), {
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI usage limit reached. Please check your workspace credits.' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      throw new Error(`AI gateway error: ${response.status}`);
+
+      throw new Error(`Anthropic API error: ${response.status}`);
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content;
-    
+    const content = data.content?.[0]?.text;
+
     if (!content) {
       throw new Error('No content in AI response');
     }
@@ -83,8 +75,8 @@ Return ONLY the rewritten message, nothing else. Keep placeholders like [Employe
 
   } catch (error) {
     console.error('Error in generate-safer function:', error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+    return new Response(JSON.stringify({
+      error: error instanceof Error ? error.message : 'An unexpected error occurred'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

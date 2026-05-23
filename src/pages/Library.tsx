@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter } from "lucide-react";
+import { FileEdit, ArrowLeft, Search, Star, Trash2, Copy, Calendar, Filter, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -238,16 +238,26 @@ export default function Library() {
               <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
           ) : filteredDrafts.length === 0 ? (
-            <div className="text-center py-12 bg-card rounded-2xl border border-border">
-              <p className="text-muted-foreground mb-4">
-                {searchQuery || filterFavorites !== "all"
-                  ? "No drafts match your filters"
-                  : "No saved drafts yet"}
-              </p>
-              {!searchQuery && filterFavorites === "all" && (
-                <Button onClick={() => navigate("/")} variant="accent">
-                  Create your first draft
-                </Button>
+            <div className="text-center py-16 bg-card rounded-2xl border border-border">
+              {searchQuery || filterFavorites !== "all" ? (
+                <>
+                  <Search className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-foreground font-medium mb-1">No drafts match your filters</p>
+                  <p className="text-sm text-muted-foreground">Try adjusting your search or filter</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                    <BookOpen className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="font-heading text-lg font-semibold text-foreground mb-2">Your library is empty</h3>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+                    Generate a draft and click Save to build your library of reusable workplace communications.
+                  </p>
+                  <Button onClick={() => navigate("/")} variant="accent">
+                    Generate your first draft
+                  </Button>
+                </>
               )}
             </div>
           ) : (

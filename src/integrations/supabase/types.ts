@@ -7,20 +7,83 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
+      documents: {
+        Row: {
+          id: string
+          organisation_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          status: string
+          uploaded_by: string
+          uploaded_at: string
+        }
+        Insert: {
+          id?: string
+          organisation_id: string
+          file_name: string
+          file_path: string
+          file_type: string
+          status?: string
+          uploaded_by: string
+          uploaded_at?: string
+        }
+        Update: {
+          id?: string
+          organisation_id?: string
+          file_name?: string
+          file_path?: string
+          file_type?: string
+          status?: string
+          uploaded_by?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      organisations: {
+        Row: {
+          id: string
+          name: string
+          plan_tier: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          plan_tier?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          plan_tier?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
           created_at: string
           full_name: string | null
           id: string
+          organisation_id: string | null
           role: string | null
+          active: boolean
+          last_active_at: string | null
           updated_at: string
         }
         Insert: {
@@ -28,7 +91,10 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          organisation_id?: string | null
           role?: string | null
+          active?: boolean
+          last_active_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -36,10 +102,21 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          organisation_id?: string | null
           role?: string | null
+          active?: boolean
+          last_active_at?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       saved_drafts: {
         Row: {
@@ -52,6 +129,7 @@ export type Database = {
           draft_message: string
           id: string
           is_favorite: boolean | null
+          organisation_id: string | null
           risk_check: string
           risk_level: string
           scenarios: string[]
@@ -72,6 +150,7 @@ export type Database = {
           draft_message: string
           id?: string
           is_favorite?: boolean | null
+          organisation_id?: string | null
           risk_check: string
           risk_level: string
           scenarios: string[]
@@ -92,6 +171,7 @@ export type Database = {
           draft_message?: string
           id?: string
           is_favorite?: boolean | null
+          organisation_id?: string | null
           risk_check?: string
           risk_level?: string
           scenarios?: string[]
@@ -102,7 +182,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "saved_drafts_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "organisations"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {

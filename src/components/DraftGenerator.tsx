@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FileText, MessageSquare, ClipboardList, Sparkles, ShieldAlert, RefreshCw, ThumbsUp, Building2, Users, Landmark, Copy, RotateCcw, Save, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { OutputCard } from "./OutputCard";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { getPlanLimits } from "@/lib/planLimits";
 import {
   Dialog,
   DialogContent,
@@ -70,7 +71,7 @@ const sectors: { value: Sector; label: string; icon: typeof Building2 }[] = [
 export function DraftGenerator() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
   const [tone, setTone] = useState("");
   const [sector, setSector] = useState<Sector>("private");
@@ -78,6 +79,7 @@ export function DraftGenerator() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingSafer, setIsGeneratingSafer] = useState(false);
   const [saferVersion, setSaferVersion] = useState<string | null>(null);
+  const [policiesUsed, setPoliciesUsed] = useState<boolean | null>(null);
   const [output, setOutput] = useState<{
     draftMessage: string;
     talkingPoints: string;
@@ -91,6 +93,30 @@ export function DraftGenerator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [usageCount, setUsageCount] = useState<number | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
+  const [progressMsg, setProgressMsg] = useState('');
+
+  const PROGRESS_MESSAGES = [
+    'Analysing your situation...',
+    'Retrieving relevant policies...',
+    'Drafting your communication...',
+    'Reviewing for compliance...',
+    'Finalising your draft...',
+  ];
+
+  useEffect(() => {
+    if (!profile?.organisation_id) return;
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    supabase
+      .from('usage_logs')
+      .select('id', { count: 'exact', head: true })
+      .eq('organisation_id', profile.organisation_id)
+      .gte('created_at', monthStart.toISOString())
+      .then(({ count }) => setUsageCount(count ?? 0));
+  }, [profile?.organisation_id]);
 
   const toggleScenario = (scenarioValue: string) => {
     setSelectedScenarios(prev => {
@@ -104,13 +130,26 @@ export function DraftGenerator() {
     });
   };
 
+  useEffect(() => {
+    if (!isGenerating) { setProgressMsg(''); return; }
+    let i = 0;
+    setProgressMsg(PROGRESS_MESSAGES[0]);
+    const interval = setInterval(() => {
+      i = Math.min(i + 1, PROGRESS_MESSAGES.length - 1);
+      setProgressMsg(PROGRESS_MESSAGES[i]);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isGenerating]);
+
   const handleGenerate = async () => {
     if (selectedScenarios.length === 0 || !tone) return;
 
     setIsGenerating(true);
     setOutput(null);
     setSaferVersion(null);
+    setPoliciesUsed(null);
     setCopiedDraft(false);
+    setLimitReached(false);
 
     try {
       const response = await fetch(
@@ -126,6 +165,8 @@ export function DraftGenerator() {
             tone,
             sector,
             context,
+            organisation_id: profile?.organisation_id ?? null,
+            user_id: user?.id ?? null,
           }),
         }
       );
@@ -133,11 +174,12 @@ export function DraftGenerator() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         if (response.status === 429) {
-          toast({
-            title: "Rate limit reached",
-            description: "Please wait a moment and try again.",
-            variant: "destructive",
-          });
+          const errData = await response.json().catch(() => ({}));
+          if (errData.error?.includes('draft limit')) {
+            setLimitReached(true);
+          } else {
+            toast({ title: "Rate limit reached", description: "Please wait a moment and try again.", variant: "destructive" });
+          }
         } else if (response.status === 402) {
           toast({
             title: "Usage limit reached",
@@ -173,6 +215,8 @@ export function DraftGenerator() {
         riskLevel: data.riskLevel as RiskLevel,
         confidence: data.confidence,
       });
+      setPoliciesUsed(data.policiesUsed ?? false);
+      setUsageCount(prev => (prev !== null ? prev + 1 : 1));
     } catch (error) {
       console.error('Error generating draft:', error);
       toast({
@@ -458,32 +502,87 @@ export function DraftGenerator() {
             />
           </div>
 
-          {/* Generate Button */}
-          <Button
-            variant="accent"
-            size="lg"
-            onClick={handleGenerate}
-            disabled={!canGenerate || isGenerating}
-            className="w-full md:w-auto md:ml-auto"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
-                Generating with AI...
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-4 h-4" />
-                Generate Draft
-              </>
-            )}
-          </Button>
+          {/* Limit reached banner */}
+          {limitReached && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800">
+              <div>
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-300">Monthly draft limit reached</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Upgrade your plan to keep generating drafts this month.</p>
+              </div>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors"
+              >
+                Upgrade Plan
+              </button>
+            </div>
+          )}
+
+          {/* Generate Button + Usage */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <Button
+              variant="accent"
+              size="lg"
+              onClick={handleGenerate}
+              disabled={!canGenerate || isGenerating || limitReached}
+              className="w-full sm:w-auto sm:ml-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-accent-foreground/30 border-t-accent-foreground rounded-full animate-spin" />
+                  <span className="animate-pulse">{progressMsg || 'Generating...'}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4" />
+                  Generate Draft
+                </>
+              )}
+            </Button>
+
+            {user && usageCount !== null && (() => {
+              const limits = getPlanLimits(null);
+              const pct = limits.draftsPerMonth === -1 ? 0 : Math.min((usageCount / limits.draftsPerMonth) * 100, 100);
+              const nearLimit = limits.draftsPerMonth !== -1 && usageCount >= limits.draftsPerMonth * 0.8;
+              return (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground sm:order-first min-w-0">
+                  <div className="w-20 h-1.5 rounded-full bg-secondary overflow-hidden shrink-0">
+                    <div
+                      className={`h-full rounded-full transition-all ${nearLimit ? 'bg-amber-500' : 'bg-accent'}`}
+                      style={{ width: limits.draftsPerMonth === -1 ? '0%' : `${pct}%` }}
+                    />
+                  </div>
+                  <span className="truncate">
+                    {limits.draftsPerMonth === -1
+                      ? `${usageCount} team drafts this month`
+                      : `${usageCount} / ${limits.draftsPerMonth} team drafts this month`}
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
         </div>
       </div>
 
       {/* Output Section */}
       {output && (
         <div className="grid gap-6">
+          {/* Policy indicator */}
+          {policiesUsed !== null && (
+            <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm border ${
+              policiesUsed
+                ? 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'
+                : 'bg-secondary border-border text-muted-foreground'
+            }`}>
+              <span>{policiesUsed ? '✓' : 'ℹ'}</span>
+              <span>
+                {policiesUsed
+                  ? 'Response informed by your organisation\'s policies'
+                  : 'General guidance applied — upload your policies for personalised responses'}
+              </span>
+            </div>
+          )}
+
           <OutputCard
             title="Draft Message"
             content={output.draftMessage}
