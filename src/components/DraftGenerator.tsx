@@ -118,8 +118,7 @@ export function DraftGenerator() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveTitle, setSaveTitle] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [cases, setCases] = useState<{ id: string; employee_name: string; department: string | null }[]>([]);
-  const [selectedCaseId, setSelectedCaseId] = useState<string>('none');
+  const [employeeName, setEmployeeName] = useState("");
   const [usageCount, setUsageCount] = useState<number | null>(null);
   const [limitReached, setLimitReached] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
@@ -372,14 +371,6 @@ export function DraftGenerator() {
     }
     const primaryScenario = scenarioTypes.find(s => s.value === selectedScenarios[0]);
     setSaveTitle(primaryScenario?.label || "Draft");
-    setSelectedCaseId('none');
-    // Fetch active cases for linking
-    const { data } = await supabase
-      .from('employee_cases')
-      .select('id, employee_name, department')
-      .eq('status', 'active')
-      .order('updated_at', { ascending: false });
-    setCases(data || []);
     setShowSaveDialog(true);
   };
 
@@ -389,6 +380,32 @@ export function DraftGenerator() {
     setIsSaving(true);
 
     try {
+      // Auto-find or create employee file if a name was provided
+      let caseId: string | null = null;
+      if (employeeName.trim() && profile?.organisation_id) {
+        const { data: existing } = await supabase
+          .from('employee_cases')
+          .select('id')
+          .eq('organisation_id', profile.organisation_id)
+          .ilike('employee_name', employeeName.trim())
+          .maybeSingle();
+
+        if (existing) {
+          caseId = existing.id;
+        } else {
+          const { data: created } = await supabase
+            .from('employee_cases')
+            .insert({ organisation_id: profile.organisation_id, created_by: user.id, employee_name: employeeName.trim() })
+            .select('id')
+            .single();
+          caseId = created?.id ?? null;
+        }
+
+        if (caseId) {
+          await supabase.from('employee_cases').update({ updated_at: new Date().toISOString() }).eq('id', caseId);
+        }
+      }
+
       const { error } = await supabase.from("saved_drafts").insert({
         user_id: user.id,
         title: saveTitle || "Untitled Draft",
@@ -404,21 +421,16 @@ export function DraftGenerator() {
         confidence_score: output.confidence.score,
         confidence_strengths: output.confidence.strengths,
         confidence_suggestion: output.confidence.suggestion,
-        case_id: selectedCaseId !== 'none' ? selectedCaseId : null,
+        case_id: caseId,
       });
-      // Update case updated_at so it surfaces at the top of the list
-      if (selectedCaseId !== 'none') {
-        await supabase
-          .from('employee_cases')
-          .update({ updated_at: new Date().toISOString() })
-          .eq('id', selectedCaseId);
-      }
 
       if (error) throw error;
 
       toast({
         title: "Draft saved!",
-        description: "Your draft has been added to your library.",
+        description: employeeName.trim()
+          ? `Saved to ${employeeName.trim()}'s file.`
+          : "Your draft has been added to your library.",
       });
       setShowSaveDialog(false);
     } catch (error) {
@@ -581,6 +593,22 @@ export function DraftGenerator() {
               className="min-h-[120px] bg-background border-border resize-none hover:border-muted-foreground/50 focus:border-ring transition-colors"
             />
           </div>
+
+          {/* Who is this about */}
+          {user && (
+            <div className="space-y-2">
+              <Label htmlFor="employee-name" className="text-sm font-medium text-foreground">
+                Who is this about? <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="employee-name"
+                placeholder="e.g., J. Smith — saves to their draft history"
+                value={employeeName}
+                onChange={(e) => setEmployeeName(e.target.value)}
+                className="bg-background border-border hover:border-muted-foreground/50 transition-colors"
+              />
+            </div>
+          )}
 
           {/* Limit reached banner */}
           {limitReached && (
@@ -898,23 +926,9 @@ export function DraftGenerator() {
                 className="mt-2"
               />
             </div>
-            {cases.length > 0 && (
-              <div>
-                <Label className="text-sm font-medium">
-                  Link to employee case <span className="text-muted-foreground font-normal">(optional)</span>
-                </Label>
-                <select
-                  value={selectedCaseId}
-                  onChange={e => setSelectedCaseId(e.target.value)}
-                  className="mt-2 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="none">No case</option>
-                  {cases.map(c => (
-                    <option key={c.id} value={c.id}>
-                      {c.employee_name}{c.department ? ` — ${c.department}` : ''}
-                    </option>
-                  ))}
-                </select>
+            {employeeName.trim() && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-sm text-primary">
+                <span>Will be saved to <strong>{employeeName.trim()}</strong>'s draft history</span>
               </div>
             )}
           </div>

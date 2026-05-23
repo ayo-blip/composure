@@ -108,7 +108,7 @@ const Index = () => {
                     <Link to="/cases">
                       <Button variant="ghost" size="sm" className="gap-2">
                         <FolderOpen className="w-4 h-4" />
-                        <span className="hidden sm:inline">Cases</span>
+                        <span className="hidden sm:inline">People</span>
                       </Button>
                     </Link>
                     <Link to="/library">

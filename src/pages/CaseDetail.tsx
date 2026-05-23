@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FileEdit, ArrowLeft, Plus, Calendar, Clock, CheckCircle, Sparkles } from 'lucide-react';
+import { FileEdit, ArrowLeft, Plus, Calendar, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -78,22 +78,6 @@ export default function CaseDetail() {
     setIsLoading(false);
   };
 
-  const toggleStatus = async () => {
-    if (!caseData) return;
-    const newStatus = caseData.status === 'active' ? 'resolved' : 'active';
-    const { error } = await supabase
-      .from('employee_cases')
-      .update({ status: newStatus, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) {
-      toast({ title: 'Failed to update case', description: error.message, variant: 'destructive' });
-    } else {
-      setCaseData(prev => prev ? { ...prev, status: newStatus } : null);
-      toast({ title: newStatus === 'resolved' ? 'Case marked as resolved' : 'Case reopened' });
-    }
-  };
-
   const highestRisk = drafts.some(d => d.risk_level === 'High')
     ? 'High'
     : drafts.some(d => d.risk_level === 'Moderate')
@@ -140,36 +124,19 @@ export default function CaseDetail() {
           <div className="bg-card border border-border rounded-2xl p-6 mb-8 shadow-card">
             <div className="flex items-start justify-between gap-4 flex-wrap">
               <div>
-                <div className="flex items-center gap-3 mb-1 flex-wrap">
-                  <h2 className="font-heading text-2xl font-semibold text-foreground">{caseData.employee_name}</h2>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    caseData.status === 'active'
-                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                  }`}>
-                    {caseData.status === 'active' ? 'Active' : 'Resolved'}
-                  </span>
-                </div>
+                <h2 className="font-heading text-2xl font-semibold text-foreground mb-1">{caseData.employee_name}</h2>
                 {caseData.department && (
                   <p className="text-sm text-muted-foreground mb-1">{caseData.department}</p>
                 )}
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
-                  Case opened {new Date(caseData.created_at).toLocaleDateString()}
+                  First draft {new Date(caseData.created_at).toLocaleDateString()}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={toggleStatus} className="gap-2">
-                  {caseData.status === 'active'
-                    ? <><CheckCircle className="w-4 h-4" />Mark Resolved</>
-                    : <><Clock className="w-4 h-4" />Reopen</>
-                  }
-                </Button>
-                <Button variant="accent" size="sm" onClick={() => navigate('/')} className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  New Draft
-                </Button>
-              </div>
+              <Button variant="accent" size="sm" onClick={() => navigate('/')} className="gap-2">
+                <Plus className="w-4 h-4" />
+                New Draft
+              </Button>
             </div>
 
             {/* Stats */}
