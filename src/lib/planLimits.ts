@@ -13,12 +13,12 @@ export const PLAN_LIMITS: Record<string, PlanLimits> = {
   professional: {
     label: 'Professional',
     draftsPerMonth: 150,
-    maxMembers: 15,
+    maxMembers: 10,
   },
   enterprise: {
     label: 'Enterprise',
     draftsPerMonth: -1,
-    maxMembers: -1,
+    maxMembers: 30,
   },
 };
 

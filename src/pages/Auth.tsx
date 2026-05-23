@@ -93,6 +93,15 @@ export default function Auth() {
             title: "Account created!",
             description: "Welcome to HRCompoSure. You're now signed in.",
           });
+          // Fire-and-forget welcome email
+          fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-welcome-email`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ email, full_name: fullName }),
+          }).catch(() => {});
           navigate("/");
         }
       }

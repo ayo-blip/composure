@@ -22,6 +22,7 @@ export function ChatBubble() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushSupported, setPushSupported] = useState(false);
+  const [monthlyCount, setMonthlyCount] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check push support on mount
@@ -29,6 +30,20 @@ export function ChatBubble() {
     setPushSupported("Notification" in window && "serviceWorker" in navigator);
     setPushEnabled(Notification.permission === "granted");
   }, []);
+
+  useEffect(() => {
+    if (!user || planTier !== "enterprise") return;
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    supabase
+      .from("chat_messages")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("role", "user")
+      .gte("created_at", monthStart.toISOString())
+      .then(({ count }) => setMonthlyCount(count ?? 0));
+  }, [user?.id, planTier, messages]);
 
   useEffect(() => {
     if (!user || !profile?.organisation_id || planTier !== "enterprise") return;
@@ -252,9 +267,16 @@ export function ChatBubble() {
                 <Send className="w-4 h-4" />
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">
-              Guidance only · Always consult qualified HR and legal advisors
-            </p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-muted-foreground">
+                Guidance only · Consult qualified HR advisors
+              </p>
+              {monthlyCount !== null && (
+                <p className={`text-xs font-medium shrink-0 ml-2 ${monthlyCount >= 45 ? "text-amber-500" : "text-muted-foreground"}`}>
+                  {monthlyCount}/50 msgs
+                </p>
+              )}
+            </div>
           </div>
         </div>
       )}

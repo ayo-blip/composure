@@ -523,12 +523,28 @@ export default function AdminDashboard() {
 
               {/* Members list */}
               <div>
-                <h3 className="font-heading text-lg font-semibold text-foreground mb-4">
-                  Team Members
-                  {members.length > 0 && (
-                    <span className="ml-2 text-sm font-normal text-muted-foreground">({members.length})</span>
-                  )}
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-heading text-lg font-semibold text-foreground">
+                    Team Members
+                    {members.length > 0 && (
+                      <span className="ml-2 text-sm font-normal text-muted-foreground">({members.length})</span>
+                    )}
+                  </h3>
+                  {org && (() => {
+                    const limits = getPlanLimits(org.plan_tier);
+                    const active = members.filter(m => m.active).length;
+                    const atLimit = limits.maxMembers !== -1 && active >= limits.maxMembers;
+                    return (
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                        atLimit
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-secondary text-muted-foreground'
+                      }`}>
+                        {active}/{limits.maxMembers === -1 ? '∞' : limits.maxMembers} seats
+                      </span>
+                    );
+                  })()}
+                </div>
 
                 {loadingMembers ? (
                   <div className="flex items-center justify-center py-12">
