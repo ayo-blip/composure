@@ -607,19 +607,25 @@ export function DraftGenerator() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Your draft is ready</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Sign in or create a free account to unlock your draft, confidence score, risk assessment, and more.
+                  Create a free account to unlock your full draft, talking points, risk assessment, and AI confidence score.
                 </p>
                 <Button variant="accent" className="w-full mb-3" onClick={() => navigate('/auth')}>
                   Sign In to Unlock
                 </Button>
-                <Button variant="outline" className="w-full" onClick={() => navigate('/auth')}>
+                <Button variant="outline" className="w-full mb-3" onClick={() => navigate('/auth')}>
                   Create Free Account
                 </Button>
-                <p className="text-xs text-muted-foreground mt-4">Free plan includes 10 drafts per month</p>
+                <button
+                  onClick={() => navigate('/pricing')}
+                  className="text-xs text-accent hover:underline"
+                >
+                  View pricing plans →
+                </button>
+                <p className="text-xs text-muted-foreground mt-2">Free plan includes 10 drafts per month · No credit card required</p>
               </div>
             </div>
           )}
-        <div className={`grid gap-6 ${isPreview ? 'blur-sm pointer-events-none select-none' : ''}`}>
+        <div className={`grid gap-6 ${isPreview ? 'blur-[3px] pointer-events-none select-none opacity-80' : ''}`}>
           {/* Policy indicator */}
           {policiesUsed !== null && (
             <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm border ${

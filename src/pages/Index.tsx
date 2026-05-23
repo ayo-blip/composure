@@ -82,12 +82,20 @@ const Index = () => {
                     </Button>
                   </>
                 ) : (
-                  <Link to="/auth">
-                    <Button variant="default" size="sm" className="gap-2">
-                      <LogIn className="w-4 h-4" />
-                      Sign In
-                    </Button>
-                  </Link>
+                  <>
+                    <Link to="/pricing">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <Zap className="w-4 h-4" />
+                        <span className="hidden sm:inline">Pricing</span>
+                      </Button>
+                    </Link>
+                    <Link to="/auth">
+                      <Button variant="default" size="sm" className="gap-2">
+                        <LogIn className="w-4 h-4" />
+                        Sign In
+                      </Button>
+                    </Link>
+                  </>
                 )}
               </>
             )}
