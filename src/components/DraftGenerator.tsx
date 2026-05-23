@@ -144,11 +144,24 @@ export function DraftGenerator() {
   const handleGenerate = async () => {
     if (selectedScenarios.length === 0 || !tone) return;
 
+    // Unauthenticated: show blurred mock preview without using tokens
+    if (!user) {
+      setIsGenerating(true);
+      setOutput(null);
+      setIsPreview(false);
+      await new Promise(res => setTimeout(res, 3200));
+      setOutput(MOCK_OUTPUT);
+      setIsPreview(true);
+      setIsGenerating(false);
+      return;
+    }
+
     setIsGenerating(true);
     setOutput(null);
     setSaferVersion(null);
     setPoliciesUsed(null);
     setCopiedDraft(false);
+    setIsPreview(false);
     setLimitReached(false);
 
     try {
@@ -284,7 +297,25 @@ export function DraftGenerator() {
     }
   };
 
+  const [isPreview, setIsPreview] = useState(false);
   const [copiedDraft, setCopiedDraft] = useState(false);
+
+  const MOCK_OUTPUT = {
+    draftMessage: `Dear [Employee Name],\n\nI wanted to take a moment to connect with you regarding some observations I've made over the past few weeks. I value our working relationship and want to ensure we're aligned on expectations and support.\n\nI've noticed [specific situation], and I'd like to understand your perspective better. My goal is to work together to find a constructive path forward that works for both of us.\n\nI'd welcome the opportunity to meet at your earliest convenience to discuss this further. Please let me know your availability.\n\nWarm regards,\n[Your Name]`,
+    talkingPoints: `• Open the conversation by acknowledging the employee's contributions\n• Describe the specific behaviour or situation using objective language\n• Ask open-ended questions to understand their perspective\n• Collaboratively discuss support options and next steps\n• Confirm agreed actions and follow-up timeline`,
+    documentationNote: `Meeting held on [Date] with [Employee Name] to discuss [situation]. Manager outlined observations and invited employee response. Employee indicated [summary of response]. Agreed next steps: [actions]. Follow-up scheduled for [date].`,
+    riskCheck: `This situation carries a moderate level of risk if not handled with care. Ensure all documentation is factual and free from subjective language. Consider whether an HR representative should be present. Review your organisation's progressive discipline policy before proceeding.`,
+    riskLevel: "Moderate" as RiskLevel,
+    confidence: {
+      score: 8.4,
+      strengths: [
+        "Detailed situational context provided",
+        "Tone aligned with a supportive approach",
+        "Scenario type clearly identified",
+      ],
+      suggestion: "Adding specific dates or prior conversations would further strengthen the draft.",
+    },
+  };
 
   const handleCopyDraft = async () => {
     if (!output) return;
@@ -566,7 +597,29 @@ export function DraftGenerator() {
 
       {/* Output Section */}
       {output && (
-        <div className="grid gap-6">
+        <div className="relative">
+          {/* Blur overlay for unauthenticated preview */}
+          {isPreview && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-start pt-16 px-4">
+              <div className="bg-card border border-border rounded-2xl shadow-lg p-8 text-center max-w-sm w-full">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Sparkles className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Your draft is ready</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Sign in or create a free account to unlock your draft, confidence score, risk assessment, and more.
+                </p>
+                <Button variant="accent" className="w-full mb-3" onClick={() => navigate('/auth')}>
+                  Sign In to Unlock
+                </Button>
+                <Button variant="outline" className="w-full" onClick={() => navigate('/auth')}>
+                  Create Free Account
+                </Button>
+                <p className="text-xs text-muted-foreground mt-4">Free plan includes 10 drafts per month</p>
+              </div>
+            </div>
+          )}
+        <div className={`grid gap-6 ${isPreview ? 'blur-sm pointer-events-none select-none' : ''}`}>
           {/* Policy indicator */}
           {policiesUsed !== null && (
             <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm border ${
@@ -766,6 +819,7 @@ export function DraftGenerator() {
               }
             />
           )}
+        </div>
         </div>
       )}
 
