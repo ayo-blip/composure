@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { getPlanLimits } from '@/lib/planLimits';
 import {
   FileEdit, ArrowLeft, Settings, Users, BarChart2,
-  Shield, CheckCircle, XCircle, Loader2, Save, UserPlus, Zap, Activity, FolderOpen
+  Shield, CheckCircle, XCircle, Loader2, Save, UserPlus, Zap, Activity, FolderOpen, Megaphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 
-type Tab = 'settings' | 'team' | 'usage' | 'activity';
+type Tab = 'settings' | 'team' | 'usage' | 'activity' | 'announcements';
 
 interface OrgMember {
   id: string;
@@ -81,6 +81,12 @@ export default function AdminDashboard() {
   const [memberStats, setMemberStats] = useState<any[]>([]);
   const [caseCount, setCaseCount] = useState<number>(0);
   const [loadingActivity, setLoadingActivity] = useState(false);
+
+  // Announcements state
+  const [broadcastContent, setBroadcastContent] = useState('');
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [pastBroadcasts, setPastBroadcasts] = useState<any[]>([]);
+  const [loadingBroadcasts, setLoadingBroadcasts] = useState(false);
 
   const fetchOrg = useCallback(async () => {
     if (!profile?.organisation_id) return;
@@ -183,10 +189,57 @@ export default function AdminDashboard() {
     setLoadingActivity(false);
   }, [profile?.organisation_id]);
 
+  const fetchBroadcasts = useCallback(async () => {
+    if (!profile?.organisation_id) return;
+    setLoadingBroadcasts(true);
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('organisation_id', profile.organisation_id)
+      .eq('role', 'broadcast')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    setPastBroadcasts(data ?? []);
+    setLoadingBroadcasts(false);
+  }, [profile?.organisation_id]);
+
+  const sendBroadcast = async () => {
+    if (!broadcastContent.trim() || !profile?.organisation_id || !profile?.id) return;
+    setIsBroadcasting(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/broadcast-message`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({
+          content: broadcastContent.trim(),
+          organisation_id: profile.organisation_id,
+          sender_user_id: profile.id,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? 'Broadcast failed');
+      toast({
+        title: 'Announcement sent',
+        description: data.emailsSent > 0
+          ? `Message delivered to ${data.emailsSent} team member${data.emailsSent !== 1 ? 's' : ''} by email.`
+          : 'Message saved to all members\' HR chat.',
+      });
+      setBroadcastContent('');
+      fetchBroadcasts();
+    } catch (err) {
+      toast({ title: 'Failed to send', description: err instanceof Error ? err.message : 'Try again.', variant: 'destructive' });
+    }
+    setIsBroadcasting(false);
+  };
+
   useEffect(() => { fetchOrg(); }, [fetchOrg]);
   useEffect(() => { if (activeTab === 'team') fetchMembers(); }, [activeTab, fetchMembers]);
   useEffect(() => { if (activeTab === 'usage') fetchUsage(); }, [activeTab, fetchUsage]);
   useEffect(() => { if (activeTab === 'activity') fetchActivity(); }, [activeTab, fetchActivity]);
+  useEffect(() => { if (activeTab === 'announcements') fetchBroadcasts(); }, [activeTab, fetchBroadcasts]);
 
   const saveSettings = async () => {
     if (!org) {
@@ -282,6 +335,7 @@ export default function AdminDashboard() {
     { id: 'team', label: 'Team', icon: <Users className="w-4 h-4" /> },
     { id: 'usage', label: 'Usage', icon: <BarChart2 className="w-4 h-4" /> },
     { id: 'activity', label: 'Team Activity', icon: <Activity className="w-4 h-4" /> },
+    { id: 'announcements', label: 'Announcements', icon: <Megaphone className="w-4 h-4" /> },
   ];
 
   return (
@@ -769,6 +823,71 @@ export default function AdminDashboard() {
                   </div>
                 </>
               )}
+            </div>
+          )}
+
+          {/* Announcements Tab */}
+          {activeTab === 'announcements' && (
+            <div className="space-y-6">
+              {/* Compose */}
+              <div className="bg-card rounded-2xl border border-border shadow-card p-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <Megaphone className="w-5 h-5 text-primary" />
+                  <h3 className="font-heading text-lg font-semibold text-foreground">Send Announcement</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Push an HR notice or policy update to all team members. It appears in their HR chat and is sent by email.
+                </p>
+                <textarea
+                  value={broadcastContent}
+                  onChange={(e) => setBroadcastContent(e.target.value)}
+                  placeholder="e.g. Reminder: updated parental leave policy takes effect from 1 June. Please review the updated policy document in the knowledge base."
+                  rows={4}
+                  className="w-full px-3 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30 resize-none"
+                />
+                <div className="flex items-center justify-between mt-3">
+                  <p className="text-xs text-muted-foreground">
+                    Sent to all active team members via in-app chat and email.
+                  </p>
+                  <Button
+                    onClick={sendBroadcast}
+                    disabled={!broadcastContent.trim() || isBroadcasting}
+                    className="gap-2 shrink-0"
+                  >
+                    {isBroadcasting ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" />Sending…</>
+                    ) : (
+                      <><Megaphone className="w-4 h-4" />Send to Team</>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Past broadcasts */}
+              <div>
+                <h3 className="font-heading text-lg font-semibold text-foreground mb-4">Past Announcements</h3>
+                {loadingBroadcasts ? (
+                  <div className="flex items-center justify-center py-10">
+                    <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                ) : pastBroadcasts.length === 0 ? (
+                  <div className="text-center py-10 bg-card rounded-2xl border border-border border-dashed">
+                    <Megaphone className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+                    <p className="text-sm text-muted-foreground">No announcements sent yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pastBroadcasts.map((b) => (
+                      <div key={b.id} className="bg-card border border-border rounded-xl p-4 shadow-card">
+                        <p className="text-sm text-foreground whitespace-pre-wrap mb-2">{b.content}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(b.created_at).toLocaleDateString('en-CA', { dateStyle: 'medium' })} · {new Date(b.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

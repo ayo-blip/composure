@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import AdminRoute from "@/components/AdminRoute";
+import { ChatBubble } from "@/components/ChatBubble";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Library from "./pages/Library";
@@ -37,6 +38,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <ChatBubble />
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/setup" element={<OrgSetup />} />
