@@ -277,7 +277,11 @@ const Index = () => {
           <p className="text-sm text-muted-foreground">
             For guidance only. Always consult HR and legal advisors for specific situations.
           </p>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-1">
+            <Link to="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <Link to="/waitlist" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Join Waitlist</Link>
+            <span className="text-muted-foreground/40 text-xs">·</span>
             <Link to="/privacy" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</Link>
             <span className="text-muted-foreground/40 text-xs">·</span>
             <Link to="/terms" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</Link>

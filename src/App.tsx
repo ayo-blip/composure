@@ -18,6 +18,9 @@ import Cases from "./pages/Cases";
 import CaseDetail from "./pages/CaseDetail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import Contact from "./pages/Contact";
+import Waitlist from "./pages/Waitlist";
+import ResetPassword from "./pages/ResetPassword";
 import SuperAdmin from "./pages/SuperAdmin";
 import NotFound from "./pages/NotFound";
 
@@ -83,6 +86,9 @@ const App = () => (
             <Route path="/cases/:id" element={<OrgGuard><CaseDetail /></OrgGuard>} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/waitlist" element={<Waitlist />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
