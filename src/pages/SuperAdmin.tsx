@@ -63,6 +63,7 @@ export default function SuperAdmin() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [togglingUser, setTogglingUser] = useState<string | null>(null);
+  const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   // Gate: only allow super admin email
   useEffect(() => {
@@ -184,6 +185,31 @@ export default function SuperAdmin() {
     })));
     setLoadingUsers(false);
   }, []);
+
+  const deleteUser = async (userId: string, userName: string | null) => {
+    const confirmed = window.confirm(
+      `Permanently delete "${userName ?? 'this user'}"?\n\nThis removes their account and login access. Their drafts and cases will remain. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    setDeletingUser(userId);
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ user_id: userId }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(`Failed to delete user: ${data.error}`);
+    } else {
+      setUsers(prev => prev.filter(u => u.id !== userId));
+    }
+    setDeletingUser(null);
+  };
 
   const toggleUserActive = async (userId: string, currentActive: boolean) => {
     setTogglingUser(userId);
@@ -358,17 +384,30 @@ export default function SuperAdmin() {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              disabled={togglingUser === u.id}
-                              onClick={() => toggleUserActive(u.id, u.active)}
-                              className={u.active ? 'text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20' : ''}
-                            >
-                              {togglingUser === u.id ? (
-                                <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                              ) : u.active ? 'Deactivate' : 'Reactivate'}
-                            </Button>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={togglingUser === u.id || deletingUser === u.id}
+                                onClick={() => toggleUserActive(u.id, u.active)}
+                                className={u.active ? 'text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20' : ''}
+                              >
+                                {togglingUser === u.id ? (
+                                  <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                ) : u.active ? 'Deactivate' : 'Reactivate'}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={deletingUser === u.id || togglingUser === u.id}
+                                onClick={() => deleteUser(u.id, u.full_name)}
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
+                              >
+                                {deletingUser === u.id ? (
+                                  <div className="w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                                ) : 'Delete'}
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}
