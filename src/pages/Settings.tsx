@@ -16,10 +16,6 @@ export default function Settings() {
   const [fullName, setFullName] = useState(profile?.full_name ?? '');
   const [savingName, setSavingName] = useState(false);
 
-  const [newEmail, setNewEmail] = useState('');
-  const [savingEmail, setSavingEmail] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,22 +35,6 @@ export default function Settings() {
       toast({ title: 'Name updated' });
     }
     setSavingName(false);
-  };
-
-  const handleChangeEmail = async () => {
-    if (!newEmail.trim() || !newEmail.includes('@')) {
-      toast({ title: 'Enter a valid email address', variant: 'destructive' });
-      return;
-    }
-    setSavingEmail(true);
-    const { error } = await supabase.auth.updateUser({ email: newEmail.trim() });
-    if (error) {
-      toast({ title: 'Failed to update email', description: error.message, variant: 'destructive' });
-    } else {
-      setEmailSent(true);
-      setNewEmail('');
-    }
-    setSavingEmail(false);
   };
 
   const handleChangePassword = async () => {
@@ -137,45 +117,16 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Email */}
+        {/* Email — read-only */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-card mb-5">
           <div className="flex items-center gap-2 mb-5">
             <Mail className="w-4 h-4 text-muted-foreground" />
             <h3 className="font-heading font-semibold text-foreground">Email Address</h3>
           </div>
-          {emailSent ? (
-            <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-foreground">
-              Confirmation sent. Check your new inbox and click the link to complete the change.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="space-y-1.5">
-                <Label>Current email</Label>
-                <Input value={user.email ?? ''} disabled className="opacity-60 cursor-not-allowed" />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="new-email">New email address</Label>
-                <Input
-                  id="new-email"
-                  type="email"
-                  value={newEmail}
-                  onChange={e => setNewEmail(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleChangeEmail()}
-                  placeholder="new@example.com"
-                />
-              </div>
-              <Button
-                variant="outline"
-                disabled={!newEmail.trim() || newEmail === user.email || savingEmail}
-                onClick={handleChangeEmail}
-              >
-                {savingEmail ? (
-                  <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
-                ) : 'Send confirmation'}
-              </Button>
-              <p className="text-xs text-muted-foreground">A confirmation link will be sent to your new address.</p>
-            </div>
-          )}
+          <div className="space-y-1.5">
+            <Label>Email</Label>
+            <Input value={user.email ?? ''} disabled className="opacity-60 cursor-not-allowed" />
+          </div>
         </div>
 
         {/* Change password */}
