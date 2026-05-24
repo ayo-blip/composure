@@ -420,10 +420,13 @@ export default function Library() {
                   </p>
                   <div className="mt-3 pt-3 border-t border-border">
                     {draft.employee_cases ? (
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <button
+                        onClick={() => draft.case_id && navigate(`/cases/${draft.case_id}`)}
+                        className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+                      >
                         <UserRound className="w-3 h-3" />
                         <span>{draft.employee_cases.employee_name}</span>
-                      </div>
+                      </button>
                     ) : (
                       <button
                         onClick={() => { setLinkDialog({ draftId: draft.id }); setLinkName(''); }}
@@ -519,10 +522,13 @@ export default function Library() {
                   <div className="p-6 border-t border-border space-y-3">
                     <div>
                       {selectedDraft.employee_cases ? (
-                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <button
+                          onClick={() => selectedDraft.case_id && navigate(`/cases/${selectedDraft.case_id}`)}
+                          className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+                        >
                           <UserRound className="w-3 h-3" />
-                          <span>Filed under <strong>{selectedDraft.employee_cases.employee_name}</strong></span>
-                        </div>
+                          <span>View <strong>{selectedDraft.employee_cases.employee_name}</strong>'s timeline →</span>
+                        </button>
                       ) : (
                         <button
                           onClick={() => { setLinkDialog({ draftId: selectedDraft.id }); setLinkName(''); }}

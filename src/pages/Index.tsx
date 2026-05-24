@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DraftGenerator } from "@/components/DraftGenerator";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { CompleteProfileModal } from "@/components/CompleteProfileModal";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2, Menu, X, Settings } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, BotMessageSquare, Megaphone, BarChart2, Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -129,11 +129,6 @@ const Index = () => {
                         </Link>
                       </>
                     )}
-                    <Link to="/cases">
-                      <Button variant="ghost" size="sm" className="gap-2">
-                        <FolderOpen className="w-4 h-4" />Cases
-                      </Button>
-                    </Link>
                     <Link to="/library">
                       <Button variant="ghost" size="sm" className="gap-2">
                         <BookOpen className="w-4 h-4" />Library
@@ -225,9 +220,6 @@ const Index = () => {
                       </Link>
                     </>
                   )}
-                  <Link to="/cases" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                    <FolderOpen className="w-4 h-4 text-muted-foreground" />Cases
-                  </Link>
                   <Link to="/library" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
                     <BookOpen className="w-4 h-4 text-muted-foreground" />Library
                   </Link>

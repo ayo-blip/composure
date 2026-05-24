@@ -14,7 +14,6 @@ import KnowledgeBase from "./pages/KnowledgeBase";
 import AdminDashboard from "./pages/AdminDashboard";
 import Pricing from "./pages/Pricing";
 import BillingSuccess from "./pages/BillingSuccess";
-import Cases from "./pages/Cases";
 import CaseDetail from "./pages/CaseDetail";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
@@ -94,7 +93,6 @@ const App = () => (
             />
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/billing/success" element={<BillingSuccess />} />
-            <Route path="/cases" element={<OrgGuard><Cases /></OrgGuard>} />
             <Route path="/cases/:id" element={<OrgGuard><CaseDetail /></OrgGuard>} />
             <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/terms" element={<TermsOfService />} />
