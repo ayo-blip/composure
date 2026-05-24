@@ -213,6 +213,10 @@ export default function Library() {
     }
   };
 
+  const selectedEmployeeCaseId = filterEmployee !== 'all'
+    ? drafts.find(d => d.employee_cases?.employee_name === filterEmployee && d.case_id)?.case_id ?? null
+    : null;
+
   const uniqueEmployeeNames = Array.from(
     new Set(
       drafts
@@ -317,6 +321,22 @@ export default function Library() {
               </SelectContent>
             </Select>
           </div>
+
+          {/* Employee timeline banner */}
+          {filterEmployee !== 'all' && selectedEmployeeCaseId && (
+            <button
+              onClick={() => navigate(`/cases/${selectedEmployeeCaseId}`)}
+              className="w-full flex items-center justify-between gap-3 mb-4 px-4 py-3 rounded-xl bg-accent/10 border border-accent/20 hover:bg-accent/15 transition-colors text-left"
+            >
+              <div className="flex items-center gap-2">
+                <UserRound className="w-4 h-4 text-accent shrink-0" />
+                <span className="text-sm font-medium text-foreground">
+                  View <span className="text-accent">{filterEmployee}</span>'s full communication timeline
+                </span>
+              </div>
+              <ChevronRight className="w-4 h-4 text-accent shrink-0" />
+            </button>
+          )}
 
           {/* Drafts List */}
           {isLoading ? (
