@@ -138,9 +138,13 @@ export default function SuperAdmin() {
 
   const updateOrgPlan = async (orgId: string, newPlan: string) => {
     setUpdatingPlan(orgId);
-    await supabase.from('organisations').update({ plan_tier: newPlan }).eq('id', orgId);
-    setOrgs(prev => prev.map(o => o.id === orgId ? { ...o, plan_tier: newPlan } : o));
-    await fetchStats();
+    const { error } = await supabase.from('organisations').update({ plan_tier: newPlan }).eq('id', orgId);
+    if (error) {
+      alert(`Failed to update plan: ${error.message}`);
+    } else {
+      setOrgs(prev => prev.map(o => o.id === orgId ? { ...o, plan_tier: newPlan } : o));
+      await fetchStats();
+    }
     setUpdatingPlan(null);
   };
 
