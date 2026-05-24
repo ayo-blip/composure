@@ -68,6 +68,96 @@ const sectors: { value: Sector; label: string; icon: typeof Building2 }[] = [
   { value: "unionized", label: "Unionized", icon: Users },
 ];
 
+const DEMO_PILLS: {
+  id: string;
+  label: string;
+  emoji: string;
+  scenario: string;
+  tone: string;
+  context: string;
+  output: {
+    draftMessage: string;
+    talkingPoints: string;
+    documentationNote: string;
+    riskCheck: string;
+    riskLevel: RiskLevel;
+    confidence: ConfidenceScore;
+  };
+}[] = [
+  {
+    id: 'performance',
+    label: 'Performance concern',
+    emoji: '📉',
+    scenario: 'performance-concern',
+    tone: 'supportive',
+    context: "An employee has been missing deadlines and their work quality has dropped noticeably over the past month. They haven't flagged any issues and I want to address this before it becomes a formal matter.",
+    output: {
+      draftMessage: `Dear [Employee Name],\n\nI'd like to set up some time for us to connect this week — I want to make sure you have everything you need and that we're aligned on priorities.\n\nOver the past few weeks, I've noticed that a few deadlines have been missed and that the output on [project/task] hasn't been at the standard we'd both expect. I want to understand if there's something getting in the way that I'm not aware of — whether that's workload, resources, or something else entirely.\n\nThis isn't a formal conversation — I'd like to approach it as a working session to figure out what support looks like and agree on a clear plan going forward.\n\nCould you let me know your availability for a 30-minute meeting this week?\n\nBest regards,\n[Your Name]`,
+      talkingPoints: `• Start by acknowledging any external pressures that may have affected performance\n• Reference specific examples using factual, objective language — avoid generalisations\n• Ask open questions: "What's been getting in the way?" before offering solutions\n• Explore whether the issue is skills, workload, motivation, or something personal\n• Agree on a clear, time-bound improvement plan with measurable outcomes\n• Confirm a follow-up date and what "good" looks like going forward`,
+      documentationNote: `Informal meeting held on [Date] with [Employee Name]. Manager outlined observations regarding missed deadlines on [project/task] and invited employee's perspective. Employee indicated [summary]. Agreed actions: [list]. Follow-up meeting scheduled for [date]. No formal action taken at this stage.`,
+      riskCheck: `Ensure all examples cited are factual and documented before the conversation. Avoid language implying a final warning unless a formal process has already begun. If the employee discloses a health or personal issue during this meeting, pause and consider whether an accommodation process is more appropriate than a performance process. Review your organisation's performance management policy before proceeding.`,
+      riskLevel: 'Low',
+      confidence: {
+        score: 8.7,
+        strengths: [
+          'Conversational tone reduces defensiveness',
+          'Specific context provided — draft is grounded in the situation',
+          'Invites dialogue before escalating to formal process',
+        ],
+        suggestion: 'Adding specific dates and documented examples would further strengthen the paper trail.',
+      },
+    },
+  },
+  {
+    id: 'attendance',
+    label: 'Attendance issue',
+    emoji: '📅',
+    scenario: 'attendance-issue',
+    tone: 'neutral',
+    context: "An employee has had 6 absences in the past 8 weeks, several falling on Mondays and Fridays. I haven't spoken to them formally yet and want to address the pattern while remaining fair.",
+    output: {
+      draftMessage: `Dear [Employee Name],\n\nI wanted to check in with you directly, as I've noticed a pattern in your absences over the past couple of months and want to make sure I understand what's going on.\n\nI've recorded [X] absences since [date], several of which have fallen on Mondays and Fridays. I want to be clear that this isn't an accusation — I'm raising it because it's a pattern I'm obliged to address, and because I'd rather have an open conversation now than let it become a more formal matter.\n\nIf there's something happening that's affecting your attendance, I'd like to know so we can look at what support or adjustments might be available. Whatever you share will be treated confidentially.\n\nCould we meet briefly this week to talk it through?\n\nKind regards,\n[Your Name]`,
+      talkingPoints: `• Present the absence data factually — dates, frequency, pattern — without accusation\n• Make clear this is a supportive conversation, not a disciplinary one\n• Create space for the employee to disclose personal or health-related factors\n• If a health issue emerges, shift the conversation toward accommodation options\n• If no explanation is offered, outline what the next stage would look like under your attendance policy\n• Confirm agreed next steps and set a review date`,
+      documentationNote: `Meeting held on [Date] with [Employee Name] to discuss attendance pattern. Manager presented absence data: [X] absences since [date], including [specific dates]. Employee responded: [summary]. No formal action taken at this stage. Agreed next steps: [list]. Review scheduled for [date].`,
+      riskCheck: `Do not imply the employee is being deceptive before they have had the opportunity to explain. If they disclose a disability or health condition, you may have a duty to make reasonable adjustments — escalate to HR before proceeding with any disciplinary route. Ensure records are accurate and that all absences were properly certified where your policy requires it.`,
+      riskLevel: 'Moderate',
+      confidence: {
+        score: 8.2,
+        strengths: [
+          'Factual framing reduces grievance risk',
+          'Opens space for disclosure without pressure',
+          'Appropriate tone for early-stage attendance conversation',
+        ],
+        suggestion: "Citing your organisation's attendance policy by name would add procedural weight.",
+      },
+    },
+  },
+  {
+    id: 'mental-health',
+    label: 'Mental health disclosure',
+    emoji: '🤝',
+    scenario: 'mental-health-disclosure',
+    tone: 'compassionate',
+    context: "An employee disclosed they're struggling with anxiety and finding it hard to focus. They haven't asked for anything specific but seemed relieved to share it. I want to respond with care and agree on next steps.",
+    output: {
+      draftMessage: `Dear [Employee Name],\n\nThank you for trusting me with what you shared. I want you to know I take it seriously, and I'm glad you felt able to tell me.\n\nI don't want to make any assumptions about what you need — everyone's experience is different. What I'd like to do is find a time for us to have a proper conversation, at your pace, about what support might look like for you right now. That could be adjustments to your workload or hours, a referral to our Employee Assistance Programme, or simply regular check-ins — whatever feels right.\n\nThere's no obligation to share more than you're comfortable with. My goal is to make sure you're supported and that work isn't adding to the pressure.\n\nWould you be open to meeting this week or next?\n\nWith care,\n[Your Name]`,
+      talkingPoints: `• Thank the employee for disclosing — acknowledge how difficult it can be to share\n• Do not probe for clinical details or ask about diagnosis\n• Focus on impact at work and what practical support could help\n• Offer concrete options: EAP referral, workload review, flexible hours, regular check-ins\n• Reassure them that disclosing will not be used against them in any formal process\n• Agree a communication plan — how and how often to check in going forward`,
+      documentationNote: `Informal check-in held on [Date] with [Employee Name] following disclosure of mental health difficulties. Manager acknowledged disclosure and discussed support options. Employee indicated [summary of preferences]. Agreed actions: [list]. Next check-in scheduled for [date]. Handled with confidentiality in line with company policy.`,
+      riskCheck: `Mental health disclosures may trigger obligations under disability discrimination legislation — even where a formal diagnosis hasn't been made. Do not ask for medical details. Ensure any adjustments offered are genuinely considered. Involve HR at the earliest opportunity. Document carefully but with sensitivity — focus on agreed support, not the nature of the disclosure itself.`,
+      riskLevel: 'Moderate',
+      confidence: {
+        score: 9.1,
+        strengths: [
+          'Compassionate framing reduces defensiveness',
+          'Does not probe for clinical information',
+          'Offers concrete next steps without pressure',
+        ],
+        suggestion: null,
+      },
+    },
+  },
+];
+
 export function DraftGenerator() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -122,6 +212,32 @@ export function DraftGenerator() {
   const [usageCount, setUsageCount] = useState<number | null>(null);
   const [limitReached, setLimitReached] = useState(false);
   const [progressMsg, setProgressMsg] = useState('');
+  const [activePill, setActivePill] = useState<string | null>(null);
+
+  const handlePillClick = (pill: typeof DEMO_PILLS[0]) => {
+    setSelectedScenarios([pill.scenario]);
+    setTone(pill.tone);
+    setContext(pill.context);
+    setActivePill(pill.id);
+    setSaferVersion(null);
+    setLimitReached(false);
+    if (!user) {
+      setOutput(pill.output);
+      setIsPreview(true);
+    } else {
+      setOutput(null);
+      setIsPreview(false);
+    }
+  };
+
+  const clearPill = () => {
+    setActivePill(null);
+    setOutput(null);
+    setIsPreview(false);
+    setSelectedScenarios([]);
+    setTone('');
+    setContext('');
+  };
 
   const PROGRESS_MESSAGES = [
     'Analysing your situation...',
@@ -452,6 +568,38 @@ export function DraftGenerator() {
       {/* Input Section */}
       <div className="bg-card rounded-2xl border border-border shadow-card p-6 md:p-8 mb-8">
         <div className="grid gap-6">
+
+          {/* Prefill pills — quick-start for visitors */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Try an example</p>
+            <div className="flex flex-wrap gap-2">
+              {DEMO_PILLS.map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => activePill === pill.id ? clearPill() : handlePillClick(pill)}
+                  className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border text-sm font-medium transition-all duration-200 ${
+                    activePill === pill.id
+                      ? 'bg-accent text-accent-foreground border-accent'
+                      : 'bg-background text-muted-foreground border-border hover:border-accent/60 hover:text-foreground'
+                  }`}
+                >
+                  <span>{pill.emoji}</span>
+                  {pill.label}
+                </button>
+              ))}
+              {activePill && (
+                <button
+                  type="button"
+                  onClick={clearPill}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  ✕ Clear
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Dropdowns Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
@@ -684,13 +832,13 @@ export function DraftGenerator() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Your draft is ready</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Create a free account to unlock your full draft, talking points, risk assessment, and confidence score.
+                  Create a free account to unlock the full draft, talking points, risk check, and confidence score.
                 </p>
                 <Button variant="accent" className="w-full mb-3" onClick={() => navigate('/auth')}>
-                  Sign In to Unlock
+                  Get my free account
                 </Button>
                 <Button variant="outline" className="w-full mb-3" onClick={() => navigate('/auth')}>
-                  Create Free Account
+                  Sign in
                 </Button>
                 <button
                   onClick={() => navigate('/pricing')}
@@ -698,7 +846,15 @@ export function DraftGenerator() {
                 >
                   View pricing plans →
                 </button>
-                <p className="text-xs text-muted-foreground mt-2">Free plan includes 10 drafts per month · No credit card required</p>
+                <p className="text-xs text-muted-foreground mt-2">Free · 3 drafts/month · No credit card</p>
+                {activePill && (
+                  <button
+                    onClick={clearPill}
+                    className="text-xs text-muted-foreground hover:text-foreground mt-3 transition-colors underline underline-offset-2 block"
+                  >
+                    ← Try a different scenario
+                  </button>
+                )}
               </div>
             </div>
           )}
