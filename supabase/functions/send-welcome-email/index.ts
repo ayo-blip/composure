@@ -33,65 +33,80 @@ serve(async (req) => {
         to: [{ email, name: full_name ?? '' }],
         subject: 'Welcome to HRCompoSure',
         htmlContent: `
-          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;color:#111827">
-            <div style="margin-bottom:28px">
-              <span style="font-size:22px;font-weight:700">HR<span style="color:#7c3aed">CompoSure</span></span>
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:0;color:#111827">
+
+            <!-- Header -->
+            <div style="background:#1e3a5f;border-radius:12px 12px 0 0;padding:28px 32px;margin-bottom:0">
+              <span style="font-size:22px;font-weight:700;color:#ffffff">HR<span style="color:#f59e0b">CompoSure</span></span>
             </div>
 
-            <h1 style="font-size:24px;font-weight:700;margin-bottom:8px">Welcome, ${firstName}!</h1>
-            <p style="color:#6b7280;font-size:15px;line-height:1.6;margin-bottom:24px">
-              You're now set up on HRCompoSure — the platform that helps managers and HR professionals handle difficult workplace conversations with confidence.
-            </p>
+            <!-- Body -->
+            <div style="background:#ffffff;padding:32px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px">
 
-            <div style="background:#f9fafb;border-radius:12px;padding:24px;margin-bottom:24px">
-              <h2 style="font-size:16px;font-weight:600;margin-bottom:16px;color:#111827">Here's what you can do:</h2>
-              <ul style="margin:0;padding:0;list-style:none;space-y:12px">
-                <li style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">
-                  <span style="color:#7c3aed;font-size:18px;line-height:1">✦</span>
-                  <div>
-                    <strong>Generate professional drafts</strong><br>
-                    <span style="color:#6b7280;font-size:14px">Get a carefully worded message for any sensitive workplace situation in under a minute.</span>
-                  </div>
-                </li>
-                <li style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">
-                  <span style="color:#7c3aed;font-size:18px;line-height:1">✦</span>
-                  <div>
-                    <strong>Assess risk before you act</strong><br>
-                    <span style="color:#6b7280;font-size:14px">Every draft includes a plain-language risk rating so you're never caught off guard.</span>
-                  </div>
-                </li>
-                <li style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px">
-                  <span style="color:#7c3aed;font-size:18px;line-height:1">✦</span>
-                  <div>
-                    <strong>Upload your HR policies</strong><br>
-                    <span style="color:#6b7280;font-size:14px">Ground every draft in your organisation's own guidelines — not generic advice.</span>
-                  </div>
-                </li>
-                <li style="display:flex;align-items:flex-start;gap:10px">
-                  <span style="color:#7c3aed;font-size:18px;line-height:1">✦</span>
-                  <div>
-                    <strong>Build an employee timeline</strong><br>
-                    <span style="color:#6b7280;font-size:14px">Save drafts to employee files and build a defensible paper trail over time.</span>
-                  </div>
-                </li>
-              </ul>
+              <h1 style="font-size:24px;font-weight:700;margin:0 0 8px 0;color:#111827">Welcome, ${firstName}!</h1>
+              <p style="color:#6b7280;font-size:15px;line-height:1.6;margin:0 0 28px 0">
+                You're now set up on HRCompoSure — the platform that helps managers and HR professionals handle difficult workplace conversations with confidence.
+              </p>
+
+              <div style="background:#f9fafb;border-radius:12px;padding:24px;margin-bottom:28px;border:1px solid #f0f0f0">
+                <h2 style="font-size:15px;font-weight:600;margin:0 0 16px 0;color:#111827">Here's what you can do:</h2>
+                <table style="width:100%;border-collapse:collapse">
+                  <tr>
+                    <td style="vertical-align:top;padding:0 10px 14px 0;width:20px">
+                      <span style="color:#f59e0b;font-size:18px;line-height:1">✦</span>
+                    </td>
+                    <td style="padding-bottom:14px">
+                      <strong style="color:#111827">Generate professional drafts</strong><br>
+                      <span style="color:#6b7280;font-size:14px">A carefully worded message for any sensitive workplace situation — ready in under a minute.</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align:top;padding:0 10px 14px 0">
+                      <span style="color:#f59e0b;font-size:18px;line-height:1">✦</span>
+                    </td>
+                    <td style="padding-bottom:14px">
+                      <strong style="color:#111827">Assess risk before you act</strong><br>
+                      <span style="color:#6b7280;font-size:14px">Every draft includes a plain-language risk rating so you're never caught off guard.</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align:top;padding:0 10px 14px 0">
+                      <span style="color:#f59e0b;font-size:18px;line-height:1">✦</span>
+                    </td>
+                    <td style="padding-bottom:14px">
+                      <strong style="color:#111827">Upload your HR policies</strong><br>
+                      <span style="color:#6b7280;font-size:14px">Ground every draft in your organisation's own guidelines — not generic advice.</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="vertical-align:top;padding:0 10px 0 0">
+                      <span style="color:#f59e0b;font-size:18px;line-height:1">✦</span>
+                    </td>
+                    <td>
+                      <strong style="color:#111827">Build an employee timeline</strong><br>
+                      <span style="color:#6b7280;font-size:14px">Save drafts to employee cases and build a defensible paper trail over time.</span>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+
+              <a href="https://www.hrcomposure.com" style="display:inline-block;background:#1e3a5f;color:#ffffff;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px;margin-bottom:28px">
+                Go to HRCompoSure →
+              </a>
+
+              <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 4px 0">
+                If you have any questions, just reply to this email — we're happy to help.
+              </p>
+              <p style="color:#6b7280;font-size:14px;margin:0">— The HRCompoSure team</p>
+
+              <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
+              <p style="color:#9ca3af;font-size:12px;margin:0">
+                For guidance only. Always consult HR and legal advisors for specific situations.<br>
+                <a href="https://www.hrcomposure.com/privacy" style="color:#9ca3af">Privacy Policy</a> ·
+                <a href="https://www.hrcomposure.com/terms" style="color:#9ca3af">Terms of Service</a> ·
+                <a href="https://www.hrcomposure.com/security" style="color:#9ca3af">Security</a>
+              </p>
             </div>
-
-            <a href="https://www.hrcomposure.com" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;font-size:15px;margin-bottom:24px">
-              Go to HRCompoSure →
-            </a>
-
-            <p style="color:#6b7280;font-size:14px;line-height:1.6;margin-bottom:4px">
-              If you have any questions, just reply to this email — we're happy to help.
-            </p>
-            <p style="color:#6b7280;font-size:14px">— The HRCompoSure team</p>
-
-            <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0">
-            <p style="color:#9ca3af;font-size:12px">
-              For guidance only. Always consult HR and legal advisors for specific situations.<br>
-              <a href="https://www.hrcomposure.com/privacy" style="color:#9ca3af">Privacy Policy</a> ·
-              <a href="https://www.hrcomposure.com/terms" style="color:#9ca3af">Terms of Service</a>
-            </p>
           </div>
         `,
       }),
