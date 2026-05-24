@@ -120,18 +120,6 @@ export default function Pricing() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-12">
-        {/* Test mode notice */}
-        <div className="max-w-xl mx-auto mb-8 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-5 py-4 text-sm text-amber-800 dark:text-amber-300">
-          <p className="font-semibold mb-1">Test mode — no real payments taken</p>
-          <p className="text-amber-700 dark:text-amber-400">Use the Stripe test card to try any paid plan:</p>
-          <ul className="mt-2 space-y-0.5 font-mono text-xs">
-            <li><span className="text-amber-600 dark:text-amber-500 mr-2">Card</span>4242 4242 4242 4242</li>
-            <li><span className="text-amber-600 dark:text-amber-500 mr-2">Expiry</span>Any future date (e.g. 12/34)</li>
-            <li><span className="text-amber-600 dark:text-amber-500 mr-2">CVC</span>Any 3 digits (e.g. 123)</li>
-            <li><span className="text-amber-600 dark:text-amber-500 mr-2">ZIP</span>Any 5 digits (e.g. 12345)</li>
-          </ul>
-        </div>
-
         <div className="text-center mb-12">
           <h2 className="font-heading text-4xl font-semibold text-foreground mb-3">Simple, transparent pricing</h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
