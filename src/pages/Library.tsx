@@ -531,118 +531,112 @@ export default function Library() {
               ))}
             </div>
 
-            {/* Full Draft Modal */}
-            {selectedDraft && (
-              <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
-                <div className="bg-card border border-border rounded-2xl shadow-lg w-full max-w-2xl my-8">
-                  {/* Modal Header */}
-                  <div className="flex items-start justify-between gap-4 p-6 border-b border-border">
-                    <div className="flex-1 min-w-0">
-                      <h2 className="font-heading text-xl font-semibold text-foreground mb-2">{selectedDraft.title}</h2>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedDraft.scenarios.map(s => (
-                          <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-                            {scenarioLabels[s] || s}
-                          </span>
-                        ))}
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">{selectedDraft.tone}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                          selectedDraft.risk_level === "High"
-                            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                            : selectedDraft.risk_level === "Moderate"
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
-                            : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                        }`}>{selectedDraft.risk_level} risk</span>
-                      </div>
-                    </div>
-                    <button onClick={() => setSelectedDraft(null)} className="p-2 hover:bg-secondary rounded-lg transition-colors shrink-0">
-                      <X className="w-5 h-5 text-muted-foreground" />
-                    </button>
-                  </div>
-
-                  {/* Modal Body */}
-                  <div className="p-6 space-y-6">
-                    {[
-                      { icon: <MessageSquare className="w-4 h-4" />, title: "Draft Message", content: selectedDraft.draft_message },
-                      { icon: <ClipboardList className="w-4 h-4" />, title: "Key Talking Points", content: selectedDraft.talking_points },
-                      { icon: <FileText className="w-4 h-4" />, title: "Documentation Note", content: selectedDraft.documentation_note },
-                      { icon: <ShieldAlert className="w-4 h-4" />, title: "Risk Assessment", content: selectedDraft.risk_check },
-                    ].map(section => (
-                      <div key={section.title}>
-                        <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                          {section.icon}
-                          <span className="text-xs font-semibold uppercase tracking-wide">{section.title}</span>
-                        </div>
-                        <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-secondary/50 rounded-xl p-4">
-                          {section.content}
-                        </p>
-                      </div>
-                    ))}
-
-                    {/* Confidence Score */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-2 text-muted-foreground">
-                        <ThumbsUp className="w-4 h-4" />
-                        <span className="text-xs font-semibold uppercase tracking-wide">Confidence Score</span>
-                      </div>
-                      <div className="bg-secondary/50 rounded-xl p-4">
-                        <div className="flex items-center gap-3 mb-3">
-                          <span className={`text-3xl font-bold ${
-                            selectedDraft.confidence_score >= 8 ? "text-green-600 dark:text-green-400"
-                            : selectedDraft.confidence_score >= 6.5 ? "text-amber-600 dark:text-amber-400"
-                            : "text-red-600 dark:text-red-400"
-                          }`}>{selectedDraft.confidence_score.toFixed(1)}</span>
-                          <span className="text-muted-foreground text-sm">/ 10</span>
-                        </div>
-                        {selectedDraft.confidence_strengths?.map((s, i) => (
-                          <p key={i} className="text-sm text-foreground/80 flex items-center gap-2 mb-1">
-                            <span className="text-green-500">✓</span>{s}
-                          </p>
-                        ))}
-                        {selectedDraft.confidence_suggestion && (
-                          <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 pt-2 border-t border-border">
-                            → {selectedDraft.confidence_suggestion}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Modal Footer */}
-                  <div className="p-6 border-t border-border space-y-3">
-                    <div>
-                      {selectedDraft.employee_cases ? (
-                        <button
-                          onClick={() => selectedDraft.case_id && navigate(`/cases/${selectedDraft.case_id}`)}
-                          className="flex items-center gap-1.5 text-xs text-accent hover:underline"
-                        >
-                          <UserRound className="w-3 h-3" />
-                          <span>View <strong>{selectedDraft.employee_cases.employee_name}</strong>'s timeline →</span>
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => { setLinkDialog({ draftId: selectedDraft.id }); setLinkName(''); }}
-                          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          <UserRound className="w-3 h-3" />
-                          Add to employee file
-                        </button>
-                      )}
-                    </div>
-                    <div className="flex gap-3">
-                      <Button variant="default" className="gap-2 flex-1" onClick={() => copyDraft(selectedDraft)}>
-                        <Copy className="w-4 h-4" />Copy Draft
-                      </Button>
-                      <Button variant="outline" onClick={() => setSelectedDraft(null)}>Close</Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
             </>
           )}
         </div>
       </main>
+
+      {/* Full Draft Modal — outside conditional so it works in all view modes */}
+      {selectedDraft && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-card border border-border rounded-2xl shadow-lg w-full max-w-2xl my-8">
+            <div className="flex items-start justify-between gap-4 p-6 border-b border-border">
+              <div className="flex-1 min-w-0">
+                <h2 className="font-heading text-xl font-semibold text-foreground mb-2">{selectedDraft.title}</h2>
+                <div className="flex flex-wrap gap-2">
+                  {selectedDraft.scenarios.map(s => (
+                    <span key={s} className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
+                      {scenarioLabels[s] || s}
+                    </span>
+                  ))}
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary capitalize">{selectedDraft.tone}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                    selectedDraft.risk_level === "High" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                    : selectedDraft.risk_level === "Moderate" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                    : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                  }`}>{selectedDraft.risk_level} risk</span>
+                </div>
+              </div>
+              <button onClick={() => setSelectedDraft(null)} className="p-2 hover:bg-secondary rounded-lg transition-colors shrink-0">
+                <X className="w-5 h-5 text-muted-foreground" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {[
+                { icon: <MessageSquare className="w-4 h-4" />, title: "Draft Message", content: selectedDraft.draft_message },
+                { icon: <ClipboardList className="w-4 h-4" />, title: "Key Talking Points", content: selectedDraft.talking_points },
+                { icon: <FileText className="w-4 h-4" />, title: "Documentation Note", content: selectedDraft.documentation_note },
+                { icon: <ShieldAlert className="w-4 h-4" />, title: "Risk Assessment", content: selectedDraft.risk_check },
+              ].map(section => (
+                <div key={section.title}>
+                  <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                    {section.icon}
+                    <span className="text-xs font-semibold uppercase tracking-wide">{section.title}</span>
+                  </div>
+                  <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed bg-secondary/50 rounded-xl p-4">
+                    {section.content}
+                  </p>
+                </div>
+              ))}
+              <div>
+                <div className="flex items-center gap-2 mb-2 text-muted-foreground">
+                  <ThumbsUp className="w-4 h-4" />
+                  <span className="text-xs font-semibold uppercase tracking-wide">Confidence Score</span>
+                </div>
+                <div className="bg-secondary/50 rounded-xl p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className={`text-3xl font-bold ${
+                      selectedDraft.confidence_score >= 8 ? "text-green-600 dark:text-green-400"
+                      : selectedDraft.confidence_score >= 6.5 ? "text-amber-600 dark:text-amber-400"
+                      : "text-red-600 dark:text-red-400"
+                    }`}>{selectedDraft.confidence_score.toFixed(1)}</span>
+                    <span className="text-muted-foreground text-sm">/ 10</span>
+                  </div>
+                  {selectedDraft.confidence_strengths?.map((s, i) => (
+                    <p key={i} className="text-sm text-foreground/80 flex items-center gap-2 mb-1">
+                      <span className="text-green-500">✓</span>{s}
+                    </p>
+                  ))}
+                  {selectedDraft.confidence_suggestion && (
+                    <p className="text-sm text-amber-600 dark:text-amber-400 mt-2 pt-2 border-t border-border">
+                      → {selectedDraft.confidence_suggestion}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 border-t border-border space-y-3">
+              <div>
+                {selectedDraft.employee_cases ? (
+                  <button
+                    onClick={() => selectedDraft.case_id && navigate(`/cases/${selectedDraft.case_id}`)}
+                    className="flex items-center gap-1.5 text-xs text-accent hover:underline"
+                  >
+                    <UserRound className="w-3 h-3" />
+                    <span>View <strong>{selectedDraft.employee_cases.employee_name}</strong>'s timeline →</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setLinkDialog({ draftId: selectedDraft.id }); setLinkName(''); }}
+                    className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <UserRound className="w-3 h-3" />
+                    Add to employee file
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="default" className="gap-2 flex-1" onClick={() => copyDraft(selectedDraft)}>
+                  <Copy className="w-4 h-4" />Copy Draft
+                </Button>
+                <Button variant="outline" onClick={() => setSelectedDraft(null)}>Close</Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Link to employee file dialog */}
       <Dialog open={!!linkDialog} onOpenChange={(open) => { if (!open) { setLinkDialog(null); setLinkName(''); } }}>
