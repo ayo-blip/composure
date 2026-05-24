@@ -12,42 +12,42 @@ const FEATURES = [
   {
     icon: MessageSquare,
     title: "Professionally Worded Drafts",
-    description: "Get a carefully worded message for any sensitive workplace situation — performance, attendance, mental health, and more.",
+    description: "A professional draft for any difficult conversation — performance, attendance, conduct, mental health — ready in under a minute.",
   },
   {
     icon: ShieldAlert,
-    title: "Risk Assessment",
-    description: "Every draft comes with a plain-language risk rating so you know what to watch out for before the conversation happens.",
+    title: "Risk Check",
+    description: "Plain-language risk flags on every draft. Know exactly where the wording could create grievance or tribunal risk — before you send.",
   },
   {
     icon: FolderOpen,
     title: "Employee Case Timeline",
-    description: "Link every draft to an employee case and build a documented record over time — organised, audit-ready, and defensible.",
+    description: "Every draft links to a case. Every case builds a timeline. By the end of any difficult situation, you have a defensible, audit-ready record.",
   },
   {
     icon: Database,
     title: "Your Policies, Built In",
-    description: "Upload your HR handbook, policies, and collective agreements. Every draft is grounded in your organisation's own guidelines — not generic advice.",
+    description: "Upload your handbook, contracts, and policies. Every draft cites the clause it relates to — not generic templates from somewhere else.",
   },
   {
     icon: FileText,
     title: "Ready-to-File Documentation",
-    description: "A factual, professionally worded record of the conversation — ready to go straight into your HR file.",
+    description: "After the conversation, get a factual write-up ready to file. No reformatting. No second-guessing. No follow-up admin.",
   },
   {
     icon: ClipboardList,
     title: "Talking Points for the Room",
-    description: "Walk into every conversation prepared. Get a structured list of points that keep things on track and professional.",
+    description: "Walk into every meeting prepared. A structured set of talking points that keeps the conversation on track — and stops it spiralling.",
   },
   {
     icon: BotMessageSquare,
     title: "HR Assistant (Enterprise)",
-    description: "Ask HR questions anytime — jurisdiction-aware, policy-grounded answers powered by AI and your own uploaded guidelines.",
+    description: "An on-demand HR advisor for every manager. Ask any HR question and get a jurisdiction-aware answer grounded in your own policies.",
   },
   {
     icon: Megaphone,
     title: "Admin Broadcast Notifications",
-    description: "Push important HR announcements to your whole team instantly — delivered in-app, by email, and as a desktop notification.",
+    description: "Get critical HR announcements in front of the whole team — instantly. In-app, by email, and as a desktop notification.",
   },
 ];
 
@@ -89,7 +89,7 @@ const Index = () => {
             </div>
             <div>
               <h1 className="font-heading text-xl font-semibold text-foreground">HR<span className="text-accent">CompoSure</span></h1>
-              <p className="text-xs text-muted-foreground">Thoughtful workplace communications</p>
+              <p className="text-xs text-muted-foreground">HR drafts. Risk-flagged. Audit-ready.</p>
             </div>
           </div>
 
@@ -264,17 +264,17 @@ const Index = () => {
 
           {/* Hero */}
           <div className="text-center mb-10 md:mb-14">
-            <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mb-4 animate-fade-in">
-              Every Difficult Conversation,
+            <h2 className="font-sans text-3xl md:text-4xl lg:text-5xl font-medium text-foreground mb-4 animate-fade-in">
+              Every difficult HR conversation, drafted in under a minute.
               <br />
-              <span className="text-accent">Handled Right — and Documented</span>
+              <span className="text-accent">Grounded in your policies. Risk flagged. Audit-ready.</span>
             </h2>
             <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto animate-fade-in mb-6" style={{ animationDelay: "100ms" }}>
-              Draft professional workplace communications, assess risk, and build a defensible paper trail for every employee situation. Built for managers and people leaders.
+              Performance, attendance, conduct, mental health — the conversations no one trains you for. HRCompoSure drafts the right words in under a minute, flags the risk in plain language, and builds an audit-ready case as you work.
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "150ms" }}>
               <Shield className="w-4 h-4" />
-              <span>No legal/medical opinions • Your data is never used for training • Plain language</span>
+              <span>Grounded in your handbook • Risk flagged on every draft • You decide what to send</span>
             </div>
           </div>
 
@@ -294,8 +294,8 @@ const Index = () => {
 
               {/* Features */}
               <div className="text-center mb-10">
-                <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">Everything you need in one place</h3>
-                <p className="text-muted-foreground max-w-xl mx-auto text-sm">Every draft comes with a full set of tools to help you communicate with confidence.</p>
+                <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">More than drafts. A defensible record, built as you work.</h3>
+                <p className="text-muted-foreground max-w-xl mx-auto text-sm">Each feature exists for one reason: to make difficult conversations less risky and better documented.</p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {FEATURES.map((feature) => {
@@ -315,8 +315,8 @@ const Index = () => {
               {/* Testimonials */}
               <div className="mt-20">
                 <div className="text-center mb-10">
-                  <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">Trusted by people leaders</h3>
-                  <p className="text-muted-foreground text-sm">Managers and HR teams using HRCompoSure every week.</p>
+                  <h3 className="font-heading text-2xl md:text-3xl font-semibold text-foreground mb-3">From the managers who stopped losing sleep over wording.</h3>
+                  <p className="text-muted-foreground text-sm">HR leads and operations directors using HRCompoSure across healthcare, manufacturing, and tech.</p>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {TESTIMONIALS.map((t) => (
@@ -338,13 +338,14 @@ const Index = () => {
 
               {/* CTA */}
               <div className="text-center mt-14">
+                <p className="text-sm text-muted-foreground mb-3">See if it fits — your first 3 drafts on us.</p>
                 <Link to="/auth">
                   <Button variant="accent" size="lg" className="gap-2">
                     <Zap className="w-4 h-4" />
-                    Get started free — 10 drafts/month
+                    Get started free — 3 drafts/month
                   </Button>
                 </Link>
-                <p className="text-xs text-muted-foreground mt-3">No credit card required</p>
+                <p className="text-xs text-muted-foreground mt-3">No credit card. No commitment.</p>
               </div>
 
             </div>

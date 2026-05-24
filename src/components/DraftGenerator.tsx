@@ -517,7 +517,7 @@ export function DraftGenerator() {
               
               {selectedScenarios.length > 1 && (
                 <p className="text-xs text-muted-foreground">
-                  AI will consider all selected scenarios when crafting the draft
+                  All selected scenarios will be considered when crafting the draft
                 </p>
               )}
             </div>
@@ -551,7 +551,7 @@ export function DraftGenerator() {
           {/* Sector Toggle */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground">
-              Sector
+              Workplace type
             </Label>
             <div className="flex flex-wrap gap-2">
               {sectors.map((s) => {
@@ -575,7 +575,7 @@ export function DraftGenerator() {
             </div>
             {(sector === "public" || sector === "unionized") && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                AI applies more conservative guidance for {sector === "public" ? "public sector" : "unionized"} environments
+                More conservative guidance applies for {sector === "public" ? "public sector" : "unionized"} environments
               </p>
             )}
           </div>
@@ -643,7 +643,7 @@ export function DraftGenerator() {
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  Generate Draft
+                  Draft my message
                 </>
               )}
             </Button>
@@ -684,7 +684,7 @@ export function DraftGenerator() {
                 </div>
                 <h3 className="font-heading text-xl font-semibold text-foreground mb-2">Your draft is ready</h3>
                 <p className="text-sm text-muted-foreground mb-6">
-                  Create a free account to unlock your full draft, talking points, risk assessment, and AI confidence score.
+                  Create a free account to unlock your full draft, talking points, risk assessment, and confidence score.
                 </p>
                 <Button variant="accent" className="w-full mb-3" onClick={() => navigate('/auth')}>
                   Sign In to Unlock
@@ -770,7 +770,7 @@ export function DraftGenerator() {
               <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-muted-foreground">
                 <ThumbsUp className="w-4 h-4" />
               </div>
-              <h3 className="font-heading text-lg font-semibold text-foreground">AI Confidence Score</h3>
+              <h3 className="font-heading text-lg font-semibold text-foreground">Confidence Score</h3>
             </div>
             
             <div className="flex items-center gap-4 mb-4">
