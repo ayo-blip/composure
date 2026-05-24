@@ -79,7 +79,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10 relative">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-elegant">
@@ -177,66 +177,67 @@ const Index = () => {
             )}
           </nav>
 
-          {/* Mobile menu — backdrop + slide-down panel */}
-          {!loading && (
-            <>
-              {/* Backdrop */}
-              <div
-                onClick={closeMenu}
-                className={`sm:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-              />
-              {/* Panel */}
-              <div className={`sm:hidden absolute top-full left-0 right-0 bg-card border-b border-border shadow-2xl z-50 transition-all duration-300 ease-in-out overflow-hidden ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
-                <div className="px-4 py-4 flex flex-col gap-1">
-                  {user ? (
+        </div>
+      </header>
+
+      {/* Mobile menu — rendered outside header to avoid stacking context issues */}
+      {!loading && (
+        <>
+          {/* Full-screen backdrop */}
+          <div
+            onClick={closeMenu}
+            className={`sm:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+          />
+          {/* Slide-down panel — anchored just below the sticky header */}
+          <div className={`sm:hidden fixed top-[65px] left-0 right-0 bg-card border-b border-border shadow-2xl z-50 transition-all duration-300 ease-in-out overflow-hidden ${menuOpen ? 'max-h-[480px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="px-4 py-4 flex flex-col gap-1">
+              {user ? (
+                <>
+                  {planTier && planTier !== 'starter' && (
+                    <div className="px-3 py-2 mb-1">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent capitalize">{planTier} plan</span>
+                    </div>
+                  )}
+                  {user.email === 'leke365@gmail.com' && (
+                    <Link to="/superadmin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-accent font-medium text-sm">
+                      <BarChart2 className="w-4 h-4" />Platform Dashboard
+                    </Link>
+                  )}
+                  {profile?.role === 'admin' && (
                     <>
-                      {planTier && planTier !== 'starter' && (
-                        <div className="flex items-center gap-2 px-3 py-2 mb-1">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent capitalize">{planTier} plan</span>
-                        </div>
-                      )}
-                      {user.email === 'leke365@gmail.com' && (
-                        <Link to="/superadmin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-accent font-medium text-sm">
-                          <BarChart2 className="w-4 h-4" />Platform Dashboard
-                        </Link>
-                      )}
-                      {profile?.role === 'admin' && (
-                        <>
-                          <Link to="/knowledge-base" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                            <Database className="w-4 h-4 text-muted-foreground" />Knowledge Base
-                          </Link>
-                          <Link to="/admin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                            <LayoutDashboard className="w-4 h-4 text-muted-foreground" />Admin Dashboard
-                          </Link>
-                        </>
-                      )}
-                      <Link to="/library" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                        <BookOpen className="w-4 h-4 text-muted-foreground" />Library
+                      <Link to="/knowledge-base" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                        <Database className="w-4 h-4 text-muted-foreground" />Knowledge Base
                       </Link>
-                      <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                        <Zap className="w-4 h-4 text-muted-foreground" />Pricing
-                      </Link>
-                      <div className="border-t border-border my-1" />
-                      <button onClick={() => { signOut(); closeMenu(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-muted-foreground text-sm w-full text-left">
-                        <LogOut className="w-4 h-4" />Sign Out
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
-                        <Zap className="w-4 h-4 text-muted-foreground" />Pricing
-                      </Link>
-                      <Link to="/auth" onClick={closeMenu} className="flex items-center justify-center gap-2 mt-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
-                        <LogIn className="w-4 h-4" />Sign In
+                      <Link to="/admin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                        <LayoutDashboard className="w-4 h-4 text-muted-foreground" />Admin Dashboard
                       </Link>
                     </>
                   )}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </header>
+                  <Link to="/library" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                    <BookOpen className="w-4 h-4 text-muted-foreground" />Library
+                  </Link>
+                  <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                    <Zap className="w-4 h-4 text-muted-foreground" />Pricing
+                  </Link>
+                  <div className="border-t border-border my-1" />
+                  <button onClick={() => { signOut(); closeMenu(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-muted-foreground text-sm w-full text-left">
+                    <LogOut className="w-4 h-4" />Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                    <Zap className="w-4 h-4 text-muted-foreground" />Pricing
+                  </Link>
+                  <Link to="/auth" onClick={closeMenu} className="flex items-center justify-center gap-2 mt-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                    <LogIn className="w-4 h-4" />Sign In
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Main Content */}
       <main className="flex-1">
