@@ -598,11 +598,11 @@ export function DraftGenerator() {
           {user && (
             <div className="space-y-2">
               <Label htmlFor="employee-name" className="text-sm font-medium text-foreground">
-                Who is this about? <span className="text-muted-foreground font-normal">(optional)</span>
+                Employee name <span className="text-muted-foreground font-normal">— links drafts to their case file</span>
               </Label>
               <Input
                 id="employee-name"
-                placeholder="e.g., J. Smith — saves to their draft history"
+                placeholder="e.g., J. Smith"
                 value={employeeName}
                 onChange={(e) => setEmployeeName(e.target.value)}
                 className="bg-background border-border hover:border-muted-foreground/50 transition-colors"
@@ -926,11 +926,21 @@ export function DraftGenerator() {
                 className="mt-2"
               />
             </div>
-            {employeeName.trim() && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/5 border border-primary/20 text-sm text-primary">
-                <span>Will be saved to <strong>{employeeName.trim()}</strong>'s draft history</span>
-              </div>
-            )}
+            <div>
+              <Label htmlFor="save-employee" className="text-sm font-medium">
+                Employee name <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="save-employee"
+                value={employeeName}
+                onChange={(e) => setEmployeeName(e.target.value)}
+                placeholder="e.g., J. Smith — links to their case file"
+                className="mt-2"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">
+                If a case file already exists for this person, the draft will be added to it automatically.
+              </p>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
