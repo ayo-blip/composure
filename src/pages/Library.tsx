@@ -366,6 +366,76 @@ export default function Library() {
                 </>
               )}
             </div>
+          ) : filterEmployee !== 'all' ? (
+            /* Timeline layout when employee is selected */
+            <div className="relative">
+              <div className="absolute left-5 top-2 bottom-2 w-px bg-border" />
+              <div className="space-y-4">
+                {[...filteredDrafts].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).map((draft) => (
+                  <div key={draft.id} className="relative pl-14">
+                    <div className="absolute left-[13px] top-5 w-4 h-4 rounded-full bg-card border-2 border-primary" />
+                    <div className="bg-card border border-border rounded-xl shadow-card p-5 hover:border-muted-foreground/30 transition-colors">
+                      <div className="flex items-start justify-between gap-4 mb-3">
+                        <button className="flex-1 min-w-0 text-left" onClick={() => setSelectedDraft(draft)}>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-heading font-semibold text-foreground truncate">{draft.title}</h3>
+                            {draft.is_favorite && <Star className="w-4 h-4 text-amber-500 fill-amber-500 flex-shrink-0" />}
+                          </div>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            {draft.scenarios.map(s => (
+                              <span key={s} className="text-xs px-2 py-1 rounded-full bg-secondary text-muted-foreground">
+                                {scenarioLabels[s] || s}
+                              </span>
+                            ))}
+                            <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary">{draft.tone}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Calendar className="w-3 h-3" />
+                            {new Date(draft.created_at).toLocaleDateString()}
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${
+                              draft.risk_level === "High" ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                              : draft.risk_level === "Moderate" ? "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
+                              : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                            }`}>{draft.risk_level} risk</span>
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-1 shrink-0">
+                          <Button variant="ghost" size="icon" onClick={() => toggleFavorite(draft)} className="h-8 w-8">
+                            <Star className={`w-4 h-4 ${draft.is_favorite ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => copyDraft(draft)} className="h-8 w-8">
+                            <Copy className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <Trash2 className="w-4 h-4 text-muted-foreground" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete draft?</AlertDialogTitle>
+                                <AlertDialogDescription>This will permanently delete "{draft.title}". This action cannot be undone.</AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteDraft(draft.id)}>Delete</AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                          <Button variant="ghost" size="icon" onClick={() => setSelectedDraft(draft)} className="h-8 w-8">
+                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 cursor-pointer" onClick={() => setSelectedDraft(draft)}>
+                        {draft.draft_message.substring(0, 200)}...
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : (
             <>
             <div className="space-y-4">

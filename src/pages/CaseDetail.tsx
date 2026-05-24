@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FileEdit, ArrowLeft, Plus, Calendar, Sparkles, X, MessageSquare, ClipboardList, FileText, ShieldAlert, ThumbsUp, Copy } from 'lucide-react';
+import { FileEdit, ArrowLeft, Plus, Calendar, Sparkles, X, MessageSquare, ClipboardList, FileText, ShieldAlert, ThumbsUp, Copy, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -87,6 +87,17 @@ export default function CaseDetail() {
   const copyDraft = async (draft: Draft) => {
     await navigator.clipboard.writeText(draft.draft_message);
     toast({ title: 'Copied!', description: 'Draft message copied to clipboard.' });
+  };
+
+  const deleteDraft = async (draftId: string) => {
+    const { error } = await supabase.from('saved_drafts').delete().eq('id', draftId);
+    if (error) {
+      toast({ title: 'Failed to delete draft', description: error.message, variant: 'destructive' });
+    } else {
+      setDrafts(prev => prev.filter(d => d.id !== draftId));
+      if (selectedDraft?.id === draftId) setSelectedDraft(null);
+      toast({ title: 'Draft deleted' });
+    }
   };
 
   const highestRisk = drafts.some(d => d.risk_level === 'High')
@@ -195,6 +206,7 @@ export default function CaseDetail() {
                 {drafts.map((draft) => (
                   <div key={draft.id} className="relative pl-14">
                     <div className="absolute left-[13px] top-5 w-4 h-4 rounded-full bg-card border-2 border-primary" />
+                    <div className="relative group">
                     <button
                       onClick={() => setSelectedDraft(draft)}
                       className="w-full bg-card border border-border rounded-xl p-5 shadow-card hover:border-muted-foreground/30 transition-colors text-left"
@@ -234,6 +246,18 @@ export default function CaseDetail() {
                         {new Date(draft.created_at).toLocaleDateString('en-CA', { dateStyle: 'medium' })}
                       </p>
                     </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Delete "${draft.title}"? This cannot be undone.`)) {
+                          deleteDraft(draft.id);
+                        }
+                      }}
+                      className="absolute top-3 right-3 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                      title="Delete draft"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400" />
+                    </button>
+                    </div>
                   </div>
                 ))}
               </div>
