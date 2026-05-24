@@ -246,7 +246,7 @@ const Index = () => {
           {user && firstName && (
             <div className="mb-8 animate-fade-in">
               <p className="font-heading text-2xl md:text-3xl font-semibold text-foreground">
-                Welcome back, <span className="text-accent">{firstName}</span> 👋
+                Welcome back, <span className="text-accent">{firstName}</span>
               </p>
               <p className="text-sm text-muted-foreground mt-1">Ready for your next conversation?</p>
             </div>
