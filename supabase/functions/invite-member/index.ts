@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MEMBER_LIMITS: Record<string, number> = { starter: 3, professional: 10, enterprise: 30 };
+const MEMBER_LIMITS: Record<string, number> = { starter: 1, professional: 10, enterprise: 30 };
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {

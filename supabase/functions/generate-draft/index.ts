@@ -66,7 +66,7 @@ serve(async (req) => {
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    const PLAN_LIMITS: Record<string, number> = { starter: 10, professional: 150, enterprise: -1 };
+    const PLAN_LIMITS: Record<string, number> = { starter: 3, professional: 150, enterprise: -1 };
 
     if (!ANTHROPIC_API_KEY) {
       throw new Error('ANTHROPIC_API_KEY is not configured');

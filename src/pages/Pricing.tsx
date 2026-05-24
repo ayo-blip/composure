@@ -36,7 +36,7 @@ const PLANS = [
     description: 'For growing HR teams',
     badge: null,
     features: [
-      'Unlimited drafts',
+      '150 drafts per month',
       'Up to 10 team members',
       'Knowledge base (policies upload)',
       'Draft library & case timeline',
