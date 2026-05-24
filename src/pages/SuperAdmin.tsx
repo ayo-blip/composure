@@ -20,6 +20,7 @@ interface OrgRow {
   id: string;
   name: string;
   plan_tier: string;
+  active: boolean;
   created_at: string;
   member_count: number;
   draft_count: number;
@@ -60,10 +61,10 @@ export default function SuperAdmin() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [updatingPlan, setUpdatingPlan] = useState<string | null>(null);
+  const [togglingOrg, setTogglingOrg] = useState<string | null>(null);
+  const [deletingOrg, setDeletingOrg] = useState<string | null>(null);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [togglingUser, setTogglingUser] = useState<string | null>(null);
-  const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
   // Gate: only allow super admin email
   useEffect(() => {
@@ -121,7 +122,7 @@ export default function SuperAdmin() {
     setLoadingOrgs(true);
     const { data: orgData } = await supabase
       .from('organisations')
-      .select('id, name, plan_tier, created_at')
+      .select('id, name, plan_tier, active, created_at')
       .order('created_at', { ascending: false });
 
     if (!orgData) { setLoadingOrgs(false); return; }
@@ -139,6 +140,7 @@ export default function SuperAdmin() {
         id: org.id,
         name: org.name,
         plan_tier: org.plan_tier ?? 'starter',
+        active: org.active ?? true,
         created_at: org.created_at,
         member_count: members.count ?? 0,
         draft_count: drafts.count ?? 0,
@@ -186,43 +188,45 @@ export default function SuperAdmin() {
     setLoadingUsers(false);
   }, []);
 
-  const deleteUser = async (userId: string, userName: string | null) => {
+  const toggleOrgActive = async (orgId: string, currentActive: boolean) => {
+    setTogglingOrg(orgId);
+    const { error } = await supabase
+      .from('organisations')
+      .update({ active: !currentActive })
+      .eq('id', orgId);
+    if (error) {
+      alert(`Failed to update organisation: ${error.message}`);
+    } else {
+      setOrgs(prev => prev.map(o => o.id === orgId ? { ...o, active: !currentActive } : o));
+      await fetchStats();
+    }
+    setTogglingOrg(null);
+  };
+
+  const deleteOrg = async (orgId: string, orgName: string) => {
     const confirmed = window.confirm(
-      `Permanently delete "${userName ?? 'this user'}"?\n\nThis removes their account and login access. Their drafts and cases will remain. This cannot be undone.`
+      `Permanently delete "${orgName}"?\n\nThis will remove the organisation, all its members, drafts, cases, and documents. This cannot be undone.`
     );
     if (!confirmed) return;
 
-    setDeletingUser(userId);
+    setDeletingOrg(orgId);
     const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-organisation`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${session?.access_token}`,
       },
-      body: JSON.stringify({ user_id: userId }),
+      body: JSON.stringify({ org_id: orgId }),
     });
     const data = await res.json();
     if (!res.ok) {
-      alert(`Failed to delete user: ${data.error}`);
+      alert(`Failed to delete organisation: ${data.error}`);
     } else {
-      setUsers(prev => prev.filter(u => u.id !== userId));
+      setOrgs(prev => prev.filter(o => o.id !== orgId));
+      await fetchStats();
     }
-    setDeletingUser(null);
-  };
-
-  const toggleUserActive = async (userId: string, currentActive: boolean) => {
-    setTogglingUser(userId);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ active: !currentActive })
-      .eq('id', userId);
-    if (error) {
-      alert(`Failed to update user: ${error.message}`);
-    } else {
-      setUsers(prev => prev.map(u => u.id === userId ? { ...u, active: !currentActive } : u));
-    }
-    setTogglingUser(null);
+    setDeletingOrg(null);
   };
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
@@ -256,7 +260,7 @@ export default function SuperAdmin() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/settings')} className="gap-2">
             <Settings className="w-4 h-4" />Account
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => { fetchStats(); if (activeTab === 'orgs') fetchOrgs(); if (activeTab === 'users') fetchUsers(); }} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { fetchStats(); if (activeTab === 'orgs') fetchOrgs(); if (activeTab === 'users') fetchUsers(); }} className="gap-2" >
             <RefreshCw className="w-4 h-4" />
             Refresh
           </Button>
@@ -362,7 +366,6 @@ export default function SuperAdmin() {
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Organisation</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
-                        <th className="px-4 py-3" />
                       </tr>
                     </thead>
                     <tbody>
@@ -382,32 +385,6 @@ export default function SuperAdmin() {
                             }`}>
                               {u.active ? 'Active' : 'Deactivated'}
                             </span>
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                disabled={togglingUser === u.id || deletingUser === u.id}
-                                onClick={() => toggleUserActive(u.id, u.active)}
-                                className={u.active ? 'text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20' : ''}
-                              >
-                                {togglingUser === u.id ? (
-                                  <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
-                                ) : u.active ? 'Deactivate' : 'Reactivate'}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                disabled={deletingUser === u.id || togglingUser === u.id}
-                                onClick={() => deleteUser(u.id, u.full_name)}
-                                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
-                              >
-                                {deletingUser === u.id ? (
-                                  <div className="w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
-                                ) : 'Delete'}
-                              </Button>
-                            </div>
                           </td>
                         </tr>
                       ))}
@@ -432,6 +409,7 @@ export default function SuperAdmin() {
                       <tr className="border-b border-border bg-secondary/50">
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Organisation</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Plan</th>
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Users</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Drafts</th>
                         <th className="text-left px-4 py-3 font-medium text-muted-foreground">Last Active</th>
@@ -444,8 +422,24 @@ export default function SuperAdmin() {
                         <tr key={org.id} className={i < orgs.length - 1 ? 'border-b border-border' : ''}>
                           <td className="px-4 py-3 font-medium text-foreground">{org.name}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${planColor[org.plan_tier]}`}>
-                              {org.plan_tier}
+                            <select
+                              value={org.plan_tier}
+                              disabled={updatingPlan === org.id}
+                              onChange={e => updateOrgPlan(org.id, e.target.value)}
+                              className="text-xs px-2 py-1 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
+                            >
+                              <option value="starter">Starter</option>
+                              <option value="professional">Professional</option>
+                              <option value="enterprise">Enterprise</option>
+                            </select>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              org.active
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            }`}>
+                              {org.active ? 'Active' : 'Suspended'}
                             </span>
                           </td>
                           <td className="px-4 py-3 text-muted-foreground">{org.member_count}</td>
@@ -457,16 +451,30 @@ export default function SuperAdmin() {
                             {new Date(org.created_at).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-3">
-                            <select
-                              value={org.plan_tier}
-                              disabled={updatingPlan === org.id}
-                              onChange={e => updateOrgPlan(org.id, e.target.value)}
-                              className="text-xs px-2 py-1 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/30"
-                            >
-                              <option value="starter">Starter</option>
-                              <option value="professional">Professional</option>
-                              <option value="enterprise">Enterprise</option>
-                            </select>
+                            <div className="flex items-center justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={togglingOrg === org.id || deletingOrg === org.id}
+                                onClick={() => toggleOrgActive(org.id, org.active)}
+                                className={org.active ? 'text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20' : ''}
+                              >
+                                {togglingOrg === org.id ? (
+                                  <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                                ) : org.active ? 'Suspend' : 'Reactivate'}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={deletingOrg === org.id || togglingOrg === org.id}
+                                onClick={() => deleteOrg(org.id, org.name)}
+                                className="text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-900/20"
+                              >
+                                {deletingOrg === org.id ? (
+                                  <div className="w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full animate-spin" />
+                                ) : 'Delete'}
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       ))}

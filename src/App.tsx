@@ -28,20 +28,20 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-// Redirects logged-in users with no org to /setup, and blocks deactivated accounts
+// Redirects logged-in users with no org to /setup, and blocks deactivated orgs
 function OrgGuard({ children }: { children: React.ReactNode }) {
-  const { user, profile, loading, profileLoading } = useAuth();
+  const { user, profile, orgActive, loading, profileLoading } = useAuth();
 
   if (loading || profileLoading) return null;
   if (user && profile && !profile.organisation_id) {
     return <Navigate to="/setup" replace />;
   }
-  if (user && profile && profile.active === false) {
+  if (user && profile?.organisation_id && orgActive === false) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center px-4">
         <div className="max-w-sm text-center space-y-3">
-          <p className="font-heading text-xl font-semibold text-foreground">Account deactivated</p>
-          <p className="text-sm text-muted-foreground">Your account has been deactivated. Please contact your organisation admin.</p>
+          <p className="font-heading text-xl font-semibold text-foreground">Organisation deactivated</p>
+          <p className="text-sm text-muted-foreground">Your organisation's account has been suspended. Please contact HRCompoSure support.</p>
         </div>
       </div>
     );

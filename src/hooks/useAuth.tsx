@@ -16,6 +16,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   planTier: string | null;
+  orgActive: boolean | null;
   loading: boolean;
   profileLoading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
@@ -31,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [planTier, setPlanTier] = useState<string | null>(null);
+  const [orgActive, setOrgActive] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(false);
 
@@ -45,8 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!error && data) {
       setProfile(data as Profile);
       if (data.organisation_id) {
-        supabase.from('organisations').select('plan_tier').eq('id', data.organisation_id).single()
-          .then(({ data: org }) => setPlanTier(org?.plan_tier ?? 'starter'));
+        supabase.from('organisations').select('plan_tier, active').eq('id', data.organisation_id).single()
+          .then(({ data: org }) => {
+            setPlanTier(org?.plan_tier ?? 'starter');
+            setOrgActive(org?.active ?? true);
+          });
       }
     }
     setProfileLoading(false);
@@ -107,11 +112,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     setProfile(null);
     setPlanTier(null);
+    setOrgActive(null);
     await supabase.auth.signOut();
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, profile, planTier, loading, profileLoading, signIn, signUp, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, session, profile, planTier, orgActive, loading, profileLoading, signIn, signUp, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
