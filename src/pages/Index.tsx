@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DraftGenerator } from "@/components/DraftGenerator";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { CompleteProfileModal } from "@/components/CompleteProfileModal";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, BotMessageSquare, Megaphone, BarChart2, Menu, X, Settings } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2, Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
