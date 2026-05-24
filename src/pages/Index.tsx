@@ -3,7 +3,7 @@ import { useState } from "react";
 import { DraftGenerator } from "@/components/DraftGenerator";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { CompleteProfileModal } from "@/components/CompleteProfileModal";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2, Menu, X } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2, Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -149,6 +149,11 @@ const Index = () => {
                         {planTier}
                       </span>
                     )}
+                    <Link to="/settings">
+                      <Button variant="ghost" size="sm" className="gap-2">
+                        <Settings className="w-4 h-4" />Account
+                      </Button>
+                    </Link>
                     <Button variant="ghost" size="sm" onClick={() => signOut()} className="gap-2">
                       <LogOut className="w-4 h-4" />Sign Out
                     </Button>
@@ -230,6 +235,9 @@ const Index = () => {
                     <Zap className="w-4 h-4 text-muted-foreground" />Pricing
                   </Link>
                   <div className="border-t border-border my-1" />
+                  <Link to="/settings" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                    <Settings className="w-4 h-4 text-muted-foreground" />Account Settings
+                  </Link>
                   <button onClick={() => { signOut(); closeMenu(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-muted-foreground text-sm w-full text-left">
                     <LogOut className="w-4 h-4" />Sign Out
                   </button>

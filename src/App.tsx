@@ -23,6 +23,7 @@ import Waitlist from "./pages/Waitlist";
 import ResetPassword from "./pages/ResetPassword";
 import SuperAdmin from "./pages/SuperAdmin";
 import Security from "./pages/Security";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -92,6 +93,7 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
             <Route path="/security" element={<Security />} />
+            <Route path="/settings" element={<OrgGuard><Settings /></OrgGuard>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
