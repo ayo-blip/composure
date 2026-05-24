@@ -373,21 +373,24 @@ export default function AdminDashboard() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mb-8 border-b border-border">
-            {tabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
-                  activeTab === tab.id
-                    ? 'border-accent text-accent'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+          <div className="mb-8 border-b border-border overflow-x-auto">
+            <div className="flex gap-1 min-w-max">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'border-accent text-accent'
+                      : 'border-transparent text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Settings Tab */}

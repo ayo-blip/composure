@@ -186,7 +186,8 @@ export default function SuperAdmin() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mb-8 border-b border-border">
+          <div className="mb-8 border-b border-border overflow-x-auto">
+            <div className="flex gap-1 min-w-max">
             {([
               { id: 'overview', label: 'Overview', icon: <BarChart2 className="w-4 h-4" /> },
               { id: 'orgs', label: 'Organisations', icon: <Building2 className="w-4 h-4" /> },
@@ -194,13 +195,14 @@ export default function SuperAdmin() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px ${
+                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap ${
                   activeTab === tab.id ? 'border-accent text-accent' : 'border-transparent text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {tab.icon}{tab.label}
               </button>
             ))}
+            </div>
           </div>
 
           {/* Overview Tab */}
