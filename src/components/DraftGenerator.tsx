@@ -223,7 +223,8 @@ export function DraftGenerator() {
     setLimitReached(false);
     if (!user) {
       setOutput(pill.output);
-      setIsPreview(true);
+      setIsPreview(false);
+      setPoliciesUsed(true);
     } else {
       setOutput(null);
       setIsPreview(false);
@@ -1041,6 +1042,24 @@ export function DraftGenerator() {
               </Button>
             )}
           </div>
+
+          {/* Signup CTA for pill demos — logged-out visitors */}
+          {activePill && !user && (
+            <div className="bg-accent/5 border border-accent/30 rounded-2xl p-6 text-center">
+              <p className="font-heading text-lg font-semibold text-foreground mb-1">This is what your drafts look like.</p>
+              <p className="text-sm text-muted-foreground mb-4">Sign up free to generate drafts grounded in your own policies — 3 drafts included, no credit card needed.</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button variant="accent" className="gap-2" onClick={() => navigate('/auth')}>
+                  <Sparkles className="w-4 h-4" />
+                  Get started free
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/auth')}>Sign in</Button>
+              </div>
+              <button onClick={clearPill} className="text-xs text-muted-foreground hover:text-foreground mt-4 transition-colors underline underline-offset-2 block mx-auto">
+                ← Try a different scenario
+              </button>
+            </div>
+          )}
 
           {/* Safer Version Output */}
           {saferVersion && (
