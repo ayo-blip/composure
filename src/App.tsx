@@ -22,6 +22,7 @@ import Contact from "./pages/Contact";
 import Waitlist from "./pages/Waitlist";
 import ResetPassword from "./pages/ResetPassword";
 import SuperAdmin from "./pages/SuperAdmin";
+import Security from "./pages/Security";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -90,6 +91,7 @@ const App = () => (
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/superadmin" element={<SuperAdmin />} />
+            <Route path="/security" element={<Security />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

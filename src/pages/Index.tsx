@@ -261,7 +261,7 @@ const Index = () => {
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary border border-border text-sm text-muted-foreground animate-fade-in" style={{ animationDelay: "150ms" }}>
               <Shield className="w-4 h-4" />
-              <span>No legal/medical opinions • No blame or judgment • Plain language</span>
+              <span>No legal/medical opinions • Your data is never used for training • Plain language</span>
             </div>
           </div>
 
@@ -347,6 +347,8 @@ const Index = () => {
           </p>
           <div className="flex items-center justify-center flex-wrap gap-x-4 gap-y-1">
             <Link to="/contact" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Contact</Link>
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <Link to="/security" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Security</Link>
             <span className="text-muted-foreground/40 text-xs">·</span>
             <Link to="/waitlist" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Join Waitlist</Link>
             <span className="text-muted-foreground/40 text-xs">·</span>
