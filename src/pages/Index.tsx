@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { DraftGenerator } from "@/components/DraftGenerator";
+import { OnboardingBanner } from "@/components/OnboardingBanner";
 import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
@@ -199,6 +200,9 @@ const Index = () => {
               <span>No legal/medical opinions • No blame or judgment • Plain language</span>
             </div>
           </div>
+
+          {/* Onboarding banner for new users */}
+          {user && <OnboardingBanner />}
 
           {/* Generator */}
           <div className="animate-slide-up" style={{ animationDelay: "200ms" }}>

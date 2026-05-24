@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FileEdit, Check, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -197,12 +197,12 @@ export default function Pricing() {
           <p className="text-sm text-muted-foreground mb-4">
             If your organisation needs more than 30 users, a higher message allowance, or a tailored setup — we offer custom plans. Get in touch and we'll work something out.
           </p>
-          <a
-            href="mailto:hello@hrcomposure.com?subject=Custom Plan Enquiry"
+          <Link
+            to="/contact"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity"
           >
             Contact us about a custom plan
-          </a>
+          </Link>
         </div>
       </main>
     </div>
