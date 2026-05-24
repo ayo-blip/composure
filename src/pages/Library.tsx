@@ -82,6 +82,7 @@ export default function Library() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterFavorites, setFilterFavorites] = useState<string>("all");
+  const [filterEmployee, setFilterEmployee] = useState<string>("all");
   const [selectedDraft, setSelectedDraft] = useState<SavedDraft | null>(null);
   const [linkDialog, setLinkDialog] = useState<{ draftId: string } | null>(null);
   const [linkName, setLinkName] = useState("");
@@ -212,17 +213,30 @@ export default function Library() {
     }
   };
 
+  const uniqueEmployeeNames = Array.from(
+    new Set(
+      drafts
+        .filter(d => d.employee_cases?.employee_name)
+        .map(d => d.employee_cases!.employee_name)
+    )
+  ).sort();
+
   const filteredDrafts = drafts.filter(draft => {
-    const matchesSearch = 
+    const matchesSearch =
       draft.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       draft.draft_message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      draft.scenarios.some(s => scenarioLabels[s]?.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesFavorite = 
-      filterFavorites === "all" || 
+      draft.scenarios.some(s => scenarioLabels[s]?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (draft.employee_cases?.employee_name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
+
+    const matchesFavorite =
+      filterFavorites === "all" ||
       (filterFavorites === "favorites" && draft.is_favorite);
-    
-    return matchesSearch && matchesFavorite;
+
+    const matchesEmployee =
+      filterEmployee === "all" ||
+      draft.employee_cases?.employee_name === filterEmployee;
+
+    return matchesSearch && matchesFavorite && matchesEmployee;
   });
 
   if (loading) {
@@ -288,6 +302,18 @@ export default function Library() {
               <SelectContent>
                 <SelectItem value="all">All drafts</SelectItem>
                 <SelectItem value="favorites">Favorites only</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterEmployee} onValueChange={setFilterEmployee}>
+              <SelectTrigger className="w-full sm:w-[200px]">
+                <UserRound className="w-4 h-4 mr-2" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All employees</SelectItem>
+                {uniqueEmployeeNames.map(name => (
+                  <SelectItem key={name} value={name}>{name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
