@@ -10,6 +10,7 @@ interface OutputCardProps {
   isVisible: boolean;
   headerContent?: React.ReactNode;
   highlightPlaceholders?: boolean;
+  blurred?: boolean;
 }
 
 // Function to highlight placeholders like [Employee Name], [Manager Name], [Date], etc.
@@ -35,7 +36,7 @@ const renderContentWithPlaceholders = (content: string, highlight: boolean) => {
   });
 };
 
-export function OutputCard({ title, content, icon, delay = 0, isVisible, headerContent, highlightPlaceholders = false }: OutputCardProps) {
+export function OutputCard({ title, content, icon, delay = 0, isVisible, headerContent, highlightPlaceholders = false, blurred = false }: OutputCardProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -72,11 +73,11 @@ export function OutputCard({ title, content, icon, delay = 0, isVisible, headerC
           {copied ? <Check className="w-4 h-4 text-accent" /> : <Copy className="w-4 h-4" />}
         </button>
       </div>
-      <div className="p-5">
+      <div className={`p-5 ${blurred ? 'blur-sm select-none pointer-events-none' : ''}`}>
         <p className="text-foreground/90 leading-relaxed whitespace-pre-wrap font-body text-sm">
           {renderContentWithPlaceholders(content, highlightPlaceholders)}
         </p>
-        {hasPlaceholders && (
+        {hasPlaceholders && !blurred && (
           <p className="mt-3 text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
             <span className="inline-block w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
             Replace highlighted placeholders with actual names before sending

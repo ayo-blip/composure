@@ -883,6 +883,7 @@ export function DraftGenerator() {
             delay={0}
             isVisible={!!output}
             highlightPlaceholders={true}
+            blurred={!!activePill && !user}
           />
           <OutputCard
             title="Key Talking Points"
@@ -890,6 +891,7 @@ export function DraftGenerator() {
             icon={<ClipboardList className="w-4 h-4" />}
             delay={150}
             isVisible={!!output}
+            blurred={!!activePill && !user}
           />
           <OutputCard
             title="Documentation Note"
@@ -898,6 +900,7 @@ export function DraftGenerator() {
             delay={300}
             isVisible={!!output}
             highlightPlaceholders={true}
+            blurred={!!activePill && !user}
           />
           <OutputCard
             title="Risk Assessment"
@@ -905,6 +908,7 @@ export function DraftGenerator() {
             icon={<ShieldAlert className="w-4 h-4" />}
             delay={450}
             isVisible={!!output}
+            blurred={!!activePill && !user}
             headerContent={
               <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                 output.riskLevel === "High" 
@@ -919,7 +923,7 @@ export function DraftGenerator() {
           />
 
           {/* Manager Confidence Score */}
-          <div 
+          <div
             className="bg-card rounded-xl border border-border shadow-card p-5 opacity-0 animate-slide-up"
             style={{ animationDelay: "500ms", animationFillMode: "forwards" }}
           >
@@ -929,7 +933,8 @@ export function DraftGenerator() {
               </div>
               <h3 className="font-heading text-lg font-semibold text-foreground">Confidence Score</h3>
             </div>
-            
+
+            <div className={`${activePill && !user ? 'blur-sm select-none pointer-events-none' : ''}`}>
             <div className="flex items-center gap-4 mb-4">
               <div className={`text-4xl font-bold ${
                 output.confidence.score >= 8 
@@ -966,6 +971,7 @@ export function DraftGenerator() {
                 </div>
               )}
             </div>
+            </div>{/* end blur wrapper */}
           </div>
 
           {/* Action Buttons */}
