@@ -26,6 +26,16 @@ interface OrgRow {
   last_active: string | null;
 }
 
+interface UserRow {
+  id: string;
+  full_name: string | null;
+  email: string | null;
+  role: string | null;
+  active: boolean;
+  organisation_id: string | null;
+  org_name: string | null;
+}
+
 interface PlatformStats {
   totalOrgs: number;
   totalUsers: number;
@@ -39,7 +49,7 @@ interface PlatformStats {
   churnedThisMonth: number;
 }
 
-type Tab = 'overview' | 'orgs';
+type Tab = 'overview' | 'orgs' | 'users';
 
 export default function SuperAdmin() {
   const navigate = useNavigate();
@@ -50,6 +60,9 @@ export default function SuperAdmin() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [updatingPlan, setUpdatingPlan] = useState<string | null>(null);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [togglingUser, setTogglingUser] = useState<string | null>(null);
 
   // Gate: only allow super admin email
   useEffect(() => {
@@ -148,8 +161,47 @@ export default function SuperAdmin() {
     setUpdatingPlan(null);
   };
 
+  const fetchUsers = useCallback(async () => {
+    setLoadingUsers(true);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name, email, role, active, organisation_id')
+      .order('active', { ascending: false });
+
+    if (!profiles) { setLoadingUsers(false); return; }
+
+    const orgIds = [...new Set(profiles.map(p => p.organisation_id).filter(Boolean))];
+    const { data: orgs } = orgIds.length
+      ? await supabase.from('organisations').select('id, name').in('id', orgIds)
+      : { data: [] };
+
+    const orgMap: Record<string, string> = {};
+    for (const org of orgs ?? []) orgMap[org.id] = org.name;
+
+    setUsers(profiles.map(p => ({
+      ...p,
+      org_name: p.organisation_id ? (orgMap[p.organisation_id] ?? null) : null,
+    })));
+    setLoadingUsers(false);
+  }, []);
+
+  const toggleUserActive = async (userId: string, currentActive: boolean) => {
+    setTogglingUser(userId);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ active: !currentActive })
+      .eq('id', userId);
+    if (error) {
+      alert(`Failed to update user: ${error.message}`);
+    } else {
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, active: !currentActive } : u));
+    }
+    setTogglingUser(null);
+  };
+
   useEffect(() => { fetchStats(); }, [fetchStats]);
   useEffect(() => { if (activeTab === 'orgs') fetchOrgs(); }, [activeTab, fetchOrgs]);
+  useEffect(() => { if (activeTab === 'users') fetchUsers(); }, [activeTab, fetchUsers]);
 
   if (loading || !user || user.email !== SUPER_ADMIN_EMAIL) return null;
 
@@ -178,7 +230,7 @@ export default function SuperAdmin() {
           <Button variant="ghost" size="sm" onClick={() => navigate('/settings')} className="gap-2">
             <Settings className="w-4 h-4" />Account
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => { fetchStats(); if (activeTab === 'orgs') fetchOrgs(); }} className="gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { fetchStats(); if (activeTab === 'orgs') fetchOrgs(); if (activeTab === 'users') fetchUsers(); }} className="gap-2">
             <RefreshCw className="w-4 h-4" />
             Refresh
           </Button>
@@ -198,6 +250,7 @@ export default function SuperAdmin() {
             {([
               { id: 'overview', label: 'Overview', icon: <BarChart2 className="w-4 h-4" /> },
               { id: 'orgs', label: 'Organisations', icon: <Building2 className="w-4 h-4" /> },
+              { id: 'users', label: 'Users', icon: <Users className="w-4 h-4" /> },
             ] as { id: Tab; label: string; icon: React.ReactNode }[]).map(tab => (
               <button
                 key={tab.id}
@@ -262,6 +315,66 @@ export default function SuperAdmin() {
                     ))}
                   </div>
                 </>
+              )}
+            </div>
+          )}
+
+          {/* Users Tab */}
+          {activeTab === 'users' && (
+            <div>
+              {loadingUsers ? (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+              ) : (
+                <div className="bg-card border border-border rounded-2xl shadow-card overflow-hidden">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-secondary/50">
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Organisation</th>
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Role</th>
+                        <th className="text-left px-4 py-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 py-3" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {users.map((u, i) => (
+                        <tr key={u.id} className={i < users.length - 1 ? 'border-b border-border' : ''}>
+                          <td className="px-4 py-3 font-medium text-foreground">
+                            {u.full_name ?? <span className="italic text-muted-foreground">No name</span>}
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground">{u.email ?? '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground">{u.org_name ?? '—'}</td>
+                          <td className="px-4 py-3 text-muted-foreground capitalize">{u.role ?? '—'}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              u.active
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                            }`}>
+                              {u.active ? 'Active' : 'Deactivated'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={togglingUser === u.id}
+                              onClick={() => toggleUserActive(u.id, u.active)}
+                              className={u.active ? 'text-red-600 border-red-200 hover:bg-red-50 dark:border-red-800 dark:hover:bg-red-900/20' : ''}
+                            >
+                              {togglingUser === u.id ? (
+                                <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />
+                              ) : u.active ? 'Deactivate' : 'Reactivate'}
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           )}
