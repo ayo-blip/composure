@@ -15,6 +15,7 @@ type Tab = 'settings' | 'team' | 'usage' | 'activity' | 'announcements';
 interface OrgMember {
   id: string;
   full_name: string | null;
+  email: string | null;
   role: string | null;
   active: boolean;
 }
@@ -109,7 +110,7 @@ export default function AdminDashboard() {
     setLoadingMembers(true);
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, role, active')
+      .select('id, full_name, email, role, active')
       .eq('organisation_id', profile.organisation_id)
       .order('full_name');
     if (error) {
@@ -579,11 +580,16 @@ export default function AdminDashboard() {
                             }`}
                           >
                             <td className="px-4 py-3">
-                              <span className="font-medium text-foreground">
-                                {member.full_name ?? 'Unnamed'}
-                              </span>
-                              {member.id === profile?.id && (
-                                <span className="ml-2 text-xs text-muted-foreground">(you)</span>
+                              <div className="flex items-center gap-1">
+                                <span className="font-medium text-foreground">
+                                  {member.full_name ?? <span className="text-muted-foreground italic">No name set</span>}
+                                </span>
+                                {member.id === profile?.id && (
+                                  <span className="ml-1 text-xs text-muted-foreground">(you)</span>
+                                )}
+                              </div>
+                              {member.email && (
+                                <p className="text-xs text-muted-foreground mt-0.5">{member.email}</p>
                               )}
                             </td>
                             <td className="px-4 py-3">

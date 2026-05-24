@@ -65,6 +65,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           fetchProfile(session.user.id);
+          if (session.user.email) {
+            supabase.from('profiles').update({ email: session.user.email }).eq('id', session.user.id);
+          }
         } else {
           setProfile(null);
         }
