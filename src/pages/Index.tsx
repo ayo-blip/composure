@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { DraftGenerator } from "@/components/DraftGenerator";
 import { OnboardingBanner } from "@/components/OnboardingBanner";
-import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2 } from "lucide-react";
+import { FileEdit, Shield, BookOpen, LogIn, LogOut, Database, LayoutDashboard, Zap, Moon, Sun, MessageSquare, ShieldAlert, FileText, ClipboardList, Star, FolderOpen, BotMessageSquare, Megaphone, BarChart2, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -70,13 +71,15 @@ const TESTIMONIALS = [
 const Index = () => {
   const { user, profile, planTier, signOut, loading } = useAuth();
   const { isDark, toggle: toggleTheme } = useTheme();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const firstName = profile?.full_name?.split(' ')[0] ?? null;
+  const closeMenu = () => setMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10 relative">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-elegant">
@@ -98,15 +101,15 @@ const Index = () => {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
+            {/* Desktop nav */}
             {!loading && (
-              <>
+              <div className="hidden sm:flex items-center gap-1">
                 {user ? (
                   <>
                     {user.email === 'leke365@gmail.com' && (
                       <Link to="/superadmin">
                         <Button variant="ghost" size="sm" className="gap-2 text-accent">
-                          <BarChart2 className="w-4 h-4" />
-                          <span className="hidden sm:inline">Platform</span>
+                          <BarChart2 className="w-4 h-4" />Platform
                         </Button>
                       </Link>
                     )}
@@ -114,64 +117,124 @@ const Index = () => {
                       <>
                         <Link to="/knowledge-base">
                           <Button variant="ghost" size="sm" className="gap-2">
-                            <Database className="w-4 h-4" />
-                            <span className="hidden sm:inline">Knowledge Base</span>
+                            <Database className="w-4 h-4" />Knowledge Base
                           </Button>
                         </Link>
                         <Link to="/admin">
                           <Button variant="ghost" size="sm" className="gap-2">
-                            <LayoutDashboard className="w-4 h-4" />
-                            <span className="hidden sm:inline">Admin</span>
+                            <LayoutDashboard className="w-4 h-4" />Admin
                           </Button>
                         </Link>
                       </>
                     )}
                     <Link to="/library">
                       <Button variant="ghost" size="sm" className="gap-2">
-                        <BookOpen className="w-4 h-4" />
-                        <span className="hidden sm:inline">Library</span>
+                        <BookOpen className="w-4 h-4" />Library
                       </Button>
                     </Link>
                     <Link to="/pricing">
                       <Button variant="ghost" size="sm" className="gap-2">
-                        <Zap className="w-4 h-4" />
-                        <span className="hidden sm:inline">Pricing</span>
+                        <Zap className="w-4 h-4" />Pricing
                       </Button>
                     </Link>
                     {planTier && planTier !== 'starter' && (
-                      <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent capitalize">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-accent/10 text-accent capitalize">
                         {planTier}
                       </span>
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => signOut()}
-                      className="gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span className="hidden sm:inline">Sign Out</span>
+                    <Button variant="ghost" size="sm" onClick={() => signOut()} className="gap-2">
+                      <LogOut className="w-4 h-4" />Sign Out
                     </Button>
                   </>
                 ) : (
                   <>
                     <Link to="/pricing">
                       <Button variant="ghost" size="sm" className="gap-2">
-                        <Zap className="w-4 h-4" />
-                        <span className="hidden sm:inline">Pricing</span>
+                        <Zap className="w-4 h-4" />Pricing
                       </Button>
                     </Link>
                     <Link to="/auth">
                       <Button variant="default" size="sm" className="gap-2">
-                        <LogIn className="w-4 h-4" />
-                        Sign In
+                        <LogIn className="w-4 h-4" />Sign In
                       </Button>
                     </Link>
                   </>
                 )}
-              </>
+              </div>
+            )}
+
+            {/* Mobile hamburger */}
+            {!loading && (
+              <button
+                onClick={() => setMenuOpen(v => !v)}
+                className="sm:hidden p-2 hover:bg-secondary rounded-lg transition-colors text-muted-foreground relative w-9 h-9 flex items-center justify-center"
+                aria-label="Menu"
+              >
+                <span className={`absolute block w-5 h-0.5 bg-current transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-0' : '-translate-y-1.5'}`} />
+                <span className={`absolute block w-5 h-0.5 bg-current transition-all duration-300 ${menuOpen ? 'opacity-0 scale-x-0' : 'opacity-100'}`} />
+                <span className={`absolute block w-5 h-0.5 bg-current transition-all duration-300 ${menuOpen ? '-rotate-45 translate-y-0' : 'translate-y-1.5'}`} />
+              </button>
             )}
           </nav>
+
+          {/* Mobile menu — backdrop + slide-down panel */}
+          {!loading && (
+            <>
+              {/* Backdrop */}
+              <div
+                onClick={closeMenu}
+                className={`sm:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300 ${menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+              />
+              {/* Panel */}
+              <div className={`sm:hidden absolute top-full left-0 right-0 bg-card border-b border-border shadow-2xl z-50 transition-all duration-300 ease-in-out overflow-hidden ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+                <div className="px-4 py-4 flex flex-col gap-1">
+                  {user ? (
+                    <>
+                      {planTier && planTier !== 'starter' && (
+                        <div className="flex items-center gap-2 px-3 py-2 mb-1">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-accent/10 text-accent capitalize">{planTier} plan</span>
+                        </div>
+                      )}
+                      {user.email === 'leke365@gmail.com' && (
+                        <Link to="/superadmin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-accent font-medium text-sm">
+                          <BarChart2 className="w-4 h-4" />Platform Dashboard
+                        </Link>
+                      )}
+                      {profile?.role === 'admin' && (
+                        <>
+                          <Link to="/knowledge-base" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                            <Database className="w-4 h-4 text-muted-foreground" />Knowledge Base
+                          </Link>
+                          <Link to="/admin" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                            <LayoutDashboard className="w-4 h-4 text-muted-foreground" />Admin Dashboard
+                          </Link>
+                        </>
+                      )}
+                      <Link to="/library" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                        <BookOpen className="w-4 h-4 text-muted-foreground" />Library
+                      </Link>
+                      <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                        <Zap className="w-4 h-4 text-muted-foreground" />Pricing
+                      </Link>
+                      <div className="border-t border-border my-1" />
+                      <button onClick={() => { signOut(); closeMenu(); }} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-muted-foreground text-sm w-full text-left">
+                        <LogOut className="w-4 h-4" />Sign Out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/pricing" onClick={closeMenu} className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-secondary transition-colors text-foreground text-sm">
+                        <Zap className="w-4 h-4 text-muted-foreground" />Pricing
+                      </Link>
+                      <Link to="/auth" onClick={closeMenu} className="flex items-center justify-center gap-2 mt-1 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-opacity">
+                        <LogIn className="w-4 h-4" />Sign In
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </header>
 
