@@ -352,12 +352,15 @@ export default function AdminDashboard() {
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center shadow-elegant">
             <FileEdit className="w-5 h-5 text-primary-foreground" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="font-heading text-xl font-semibold text-foreground">
               HR<span className="text-accent">CompoSure</span>
             </h1>
             <p className="text-xs text-muted-foreground">Admin Dashboard</p>
           </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/settings')} className="gap-2">
+            <Settings className="w-4 h-4" />Account
+          </Button>
         </div>
       </header>
 

@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
   FileEdit, ArrowLeft, BarChart2, Building2, Users, Zap,
-  TrendingUp, MessageSquare, FileText, Activity, RefreshCw,
+  TrendingUp, MessageSquare, FileText, Activity, RefreshCw, Settings,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -175,6 +175,9 @@ export default function SuperAdmin() {
             </h1>
             <p className="text-xs text-muted-foreground">Super Admin</p>
           </div>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/settings')} className="gap-2">
+            <Settings className="w-4 h-4" />Account
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => { fetchStats(); if (activeTab === 'orgs') fetchOrgs(); }} className="gap-2">
             <RefreshCw className="w-4 h-4" />
             Refresh
