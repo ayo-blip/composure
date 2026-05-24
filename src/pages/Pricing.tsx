@@ -17,7 +17,7 @@ const PLANS = [
       'Knowledge base (policies upload)',
       'Draft library',
     ],
-    cta: 'Current Plan',
+    cta: 'Downgrade to Starter',
     highlighted: false,
   },
   {
